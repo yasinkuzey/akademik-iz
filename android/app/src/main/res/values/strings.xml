@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ogrenci Calisma</string>
+    <string name="title_activity_main">Ogrenci Calisma</string>
+    <string name="package_name">com.ogrenci.calisma</string>
+    <string name="custom_url_scheme">com.ogrenci.calisma</string>
+</resources>
