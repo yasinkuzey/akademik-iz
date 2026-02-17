@@ -1,53 +1,63 @@
-# Öğrenci Çalışma Platformu
+# 🎓 Öğrenciler İçin Her Şey - Eğitim Asistanı
 
-Web uygulaması: çalışma ekleme (AI ile 4 soru), deneme analizi, sınav tahmini, AI öğretmen sohbeti, istatistikler ve liderlik tablosu.
+Bu proje, öğrencilerin sınav hazırlık süreçlerini desteklemek, yapay zeka destekli soru üretmek, deneme analizi yapmak ve rehberlik hizmeti sunmak amacıyla geliştirilmiştir. Modern web teknolojileri kullanılarak hazırlanmış, Vercel üzerinde çalışan, hızlı ve güvenli bir uygulamadır.
 
-## Gereksinimler
+## 🚀 Özellikler
 
-- Node.js 18+
-- Supabase hesabı
-- Google Gemini API anahtarı
+- **AI Soru Üretimi:** Seçtiğiniz ders, konu ve süreye göre kişiye özel testler hazırlar. (Powered by Gemini AI)
+- **Sınav Simülasyonu:** Gerçek sınav süresi ve formatında deneme çözme imkanı.
+- **Yapay Zeka Sohbeti:** Eğitim koçu ile (AI) dilediğiniz zaman sohbet edin, rehberlik alın.
+- **Deneme Analizi:** Yüklediğiniz deneme sonuçlarını analiz eder, eksiklerinizi belirler.
+- **Kişisel Takip:** Çalışma saatlerinizi, hedeflediğiniz üniversite ve bölümleri kaydedin.
 
-## Kurulum
+## 🛠️ Teknolojiler
 
-1. Bağımlılıkları yükle:
-   ```bash
-   npm install
-   ```
+- **Frontend:** React, TypeScript, Vite
+- **Backend:** Node.js, Express (Vercel Serverless Functions)
+- **Veritabanı:** Supabase (PostgreSQL)
+- **Yapay Zeka:** Google Gemini API (gemini-2.5-flash)
+- **Routing:** React Router DOM
+- **Deployment:** Vercel
 
-2. **Veritabanı (Supabase) – tabloları siz oluşturuyorsunuz:**
-   - [supabase.com](https://supabase.com) → Yeni proje oluştur.
-   - **Project Settings → API** bölümünden **Project URL** ve **anon public** key’i kopyala (uzun JWT, `eyJ...` ile başlar).
-   - **SQL Editor**’e gir → **New query** → `supabase/migrations/001_schema.sql` dosyasının **içeriğini tamamen** yapıştır → **Run**. Tablolar ve kurallar oluşur. Aynı script’i tekrar çalıştırırsanız hata vermez.
-   - `.env` içinde `VITE_SUPABASE_URL` ve `VITE_SUPABASE_ANON_KEY` bu URL ve key ile doldurulunca uygulama veritabanına bağlanmış olur.
+## 📦 Kurulum (Yerel Geliştirme)
 
-3. Ortam değişkenleri: `.env` dosyası oluştur (`.env.example` kopyala):
-   - `VITE_SUPABASE_URL` – Supabase proje URL
-   - `VITE_SUPABASE_ANON_KEY` – Supabase anon key
-   - `GEMINI_API_KEY` – Google AI Studio'dan API key
+Projeyi kendi bilgisayarınızda çalıştırmak için:
 
-4. API sunucusunu (Gemini proxy) ayrı terminalde çalıştır:
-   ```bash
-   npm run api
-   ```
-   Varsayılan port: 3001.
+1.  Repoyu klonlayın:
+    ```bash
+    git clone https://github.com/yasinkuzey/ogrenciler-icin-hersey.git
+    cd ogrenciler-icin-hersey
+    ```
 
-5. Frontend’i çalıştır:
-   ```bash
-   npm run dev
-   ```
-   Tarayıcıda http://localhost:5173 aç. Vite, `/api` isteklerini 3001’e yönlendirir.
+2.  Bağımlılıkları yükleyin:
+    ```bash
+    npm install
+    ```
 
-## Supabase şeması
+3.  `.env` dosyasını oluşturun ve gerekli anahtarları ekleyin:
+    ```env
+    VITE_SUPABASE_URL=YOUR_SUPABASE_URL
+    VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_KEY
+    GEMINI_API_KEY=YOUR_GOOGLE_AI_KEY
+    ```
 
-Migration: `supabase/migrations/001_schema.sql`. İçeriği SQL Editor’de çalıştırın; tablolar (profiles, study_sessions, session_questions, exam_analyses, exam_predictions, chat_messages), RLS ve tetikleyiciler oluşur.
+4.  Projeyi başlatın:
+    ```bash
+    npm run dev
+    ```
 
-## Kullanım
+## 🌐 Canlı Sürüm
 
-- **Kayıt / Giriş:** E-posta ve şifre ile.
-- **Çalışma ekle:** Ders, konu, süre gir → 4 soru (cevabı yazarak) çöz → 3+ doğru yaparsan çalışma ve puan kaydedilir.
-- **İstatistikler:** Ana sayfa ve İstatistikler sayfasında özet ve ders dağılımı.
-- **Deneme analizi:** TYT/AYT/Ortaokul seç, doğru-yanlış gir → AI analiz.
-- **Sınav tahmini:** Sınıf ve müfredat yaz → AI öneri.
-- **AI öğretmen:** Sohbet sayfasında soru sor veya konu anlatımı iste.
-- **Liderlik:** Her başarılı çalışmada puan kazanılır; tabloda sıralama görünür.
+Proje şu adreste yayındadır: [https://oegrenci-icin-sistem.vercel.app](https://oegrenci-icin-sistem.vercel.app)
+
+## 🤝 Katkıda Bulunma
+
+1.  Bu projeyi forklayın.
+2.  Yeni bir özellik dalı (branch) oluşturun (`git checkout -b yeni-ozellik`).
+3.  Değişikliklerinizi yapın ve commitleyin (`git commit -m 'Yeni özellik eklendi'`).
+4.  Dalınızı (branch) gönderin (`git push origin yeni-ozellik`).
+5.  Bir Pull Request oluşturun.
+
+## 📄 Lisans
+
+Bu proje MIT lisansı ile lisanslanmıştır.
