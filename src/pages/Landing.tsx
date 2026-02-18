@@ -30,7 +30,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-[rgb(var(--bg))]">
-      <img src="/logo.png" alt="Akademik İz" className="w-24 h-24 mb-6 object-contain" />
+      <img src="/logo-new.png" alt="Akademik İz" className="w-24 h-24 mb-6 object-contain" />
       <h1 className="text-4xl font-black text-center mb-2 tracking-tight">AKADEMİK İZ</h1>
       <p className="text-[rgb(var(--muted))] text-center mb-8 max-w-md">
         Çalışmalarını ekle, AI ile soru çöz, deneme analizi yap ve sınav tahminlerini al.

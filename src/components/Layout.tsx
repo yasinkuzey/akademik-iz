@@ -49,7 +49,7 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
       <header className="sticky top-0 z-10 border-b border-[rgb(var(--border))] bg-[rgb(var(--card))]">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <Link to="/dashboard" className="flex items-center gap-2 font-bold text-lg text-[rgb(var(--accent))] truncate">
-            <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+            <img src="/logo-new.png" alt="Logo" className="w-8 h-8 object-contain" />
             <span>AKADEMİK İZ</span>
           </Link>
 
