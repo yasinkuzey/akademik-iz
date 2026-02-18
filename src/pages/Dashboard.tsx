@@ -100,26 +100,28 @@ export default function Dashboard() {
         {sessions.length === 0 ? (
           <div className="p-8 text-center text-[rgb(var(--muted))]">Henüz çalışma eklemedin. <Link to="/study/new" className="text-[rgb(var(--accent))]">Çalışma ekle</Link></div>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[rgb(var(--border))] bg-[rgb(var(--bg))]">
-                <th className="text-left p-3">Ders</th>
-                <th className="text-left p-3">Konu</th>
-                <th className="text-left p-3">Süre</th>
-                <th className="text-left p-3">Tarih</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sessions.map((s) => (
-                <tr key={s.id} className="border-b border-[rgb(var(--border))]">
-                  <td className="p-3">{s.subject}</td>
-                  <td className="p-3">{s.topic}</td>
-                  <td className="p-3">{s.hours} sa</td>
-                  <td className="p-3">{new Date(s.created_at).toLocaleDateString('tr-TR')}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[rgb(var(--border))] bg-[rgb(var(--bg))]">
+                  <th className="text-left p-3 whitespace-nowrap">Ders</th>
+                  <th className="text-left p-3 whitespace-nowrap">Konu</th>
+                  <th className="text-left p-3 whitespace-nowrap">Süre</th>
+                  <th className="text-left p-3 whitespace-nowrap">Tarih</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {sessions.map((s) => (
+                  <tr key={s.id} className="border-b border-[rgb(var(--border))] hover:bg-[rgb(var(--bg))] transition-colors">
+                    <td className="p-3 whitespace-nowrap">{s.subject}</td>
+                    <td className="p-3 whitespace-nowrap">{s.topic}</td>
+                    <td className="p-3 whitespace-nowrap">{s.hours} sa</td>
+                    <td className="p-3 whitespace-nowrap">{new Date(s.created_at).toLocaleDateString('tr-TR')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

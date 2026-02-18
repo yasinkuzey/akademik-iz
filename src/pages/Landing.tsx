@@ -30,11 +30,12 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-[rgb(var(--bg))]">
-      <h1 className="text-3xl font-bold text-center mb-2">Öğrenci Çalışma Platformu</h1>
+      <img src="/logo.png" alt="Akademik İz" className="w-24 h-24 mb-6 object-contain" />
+      <h1 className="text-4xl font-black text-center mb-2 tracking-tight">AKADEMİK İZ</h1>
       <p className="text-[rgb(var(--muted))] text-center mb-8 max-w-md">
         Çalışmalarını ekle, AI ile soru çöz, deneme analizi yap ve sınav tahminlerini al.
       </p>
-      <div className="flex gap-4">
+      <div className="flex flex-wrap justify-center gap-4">
         <Link
           to="/login"
           className="px-6 py-3 rounded-lg border border-[rgb(var(--border))] font-medium hover:bg-[rgb(var(--card))]"

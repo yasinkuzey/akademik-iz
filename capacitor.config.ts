@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.ogrenci.calisma',
-  appName: 'Ogrenci Calisma',
+  appId: 'com.akademikiz.app',
+  appName: 'Akademik İz',
   webDir: 'dist'
 };
 
