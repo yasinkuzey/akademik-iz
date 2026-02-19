@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { Chess } from 'chess.js'
@@ -169,8 +169,8 @@ function DailyPuzzle({ user }: { user: any }) {
                         key={opt}
                         onClick={() => !alreadyPlayed && setSelected(opt)}
                         className={`p-3 rounded-lg border text-left transition-all ${selected === opt
-                                ? 'border-[rgb(var(--accent))] bg-[rgb(var(--accent))]/10 ring-1 ring-[rgb(var(--accent))]'
-                                : 'border-[rgb(var(--border))] hover:bg-[rgb(var(--muted))]/5'
+                            ? 'border-[rgb(var(--accent))] bg-[rgb(var(--accent))]/10 ring-1 ring-[rgb(var(--accent))]'
+                            : 'border-[rgb(var(--border))] hover:bg-[rgb(var(--muted))]/5'
                             } ${alreadyPlayed ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                         {opt}
@@ -403,7 +403,7 @@ function Sudoku({ user }: { user: any }) {
 // --- Chess (New) ---
 function ChessGame({ user }: { user: any }) {
     const [game, setGame] = useState(new Chess())
-    const [moveFrom, setMoveFrom] = useState<string | null>(null)
+
     const [winner, setWinner] = useState<string | null>(null)
 
     function makeAMove(move: any) {
