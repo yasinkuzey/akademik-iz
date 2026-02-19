@@ -19,7 +19,7 @@ export default function StudyNew() {
   const [step, setStep] = useState<'form' | 'quiz' | 'result'>('form')
   const [subject, setSubject] = useState('')
   const [topic, setTopic] = useState('')
-  const [hours, setHours] = useState(1)
+  const [hours, setHours] = useState<number | ''>('')
   const [questions, setQuestions] = useState<QuizQuestion[]>([])
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [loading, setLoading] = useState(false)
@@ -110,7 +110,7 @@ export default function StudyNew() {
 
           if (questionsErr) setError('Sorular kaydedilemedi')
           else if (passed) {
-            const points = 10 + Math.min(hours * 2, 20)
+            const points = 10 + Math.min(Number(hours) * 2, 20)
             await supabase.rpc('increment_user_points', { p_user_id: user.id, p_points: points })
           }
         }
@@ -276,14 +276,16 @@ export default function StudyNew() {
             min={1}
             max={24}
             value={hours}
-            onChange={(e) => setHours(Number(e.target.value))}
+            onChange={(e) => setHours(e.target.value === '' ? '' : Number(e.target.value))}
             className="w-full rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-3 py-2"
             onFocus={(e) => e.target.select()}
+            placeholder="Süre (saat)..."
+            required
           />
         </div>
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !hours}
           className="w-full py-3 rounded-lg bg-[rgb(var(--accent))] text-white font-medium disabled:opacity-50"
         >
           {loading ? 'Sorular üretiliyor...' : 'Soruları üret'}
