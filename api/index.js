@@ -159,8 +159,20 @@ Sadece JSON dizisi döndür.`;
             const typeLabel = body.examType === 'tyt' ? 'TYT' : body.examType === 'ayt' ? 'AYT' : body.examType === 'kpss' ? 'KPSS' : body.examType === 'ales' ? 'ALES' : 'Ortaokul (LGS)';
             systemInstruction = 'Sen bir eğitim danışmanısın.';
             promptText = `Öğrenci ${typeLabel} deneme sonuçlarını paylaştı. Eksikleri, güçlü/zayıf alanları ve ne yapması gerektiğini Türkçe olarak analiz et.
-            Ayrıca, girilen netlere göre tahmini bir puan (örneğin "Tahmini Puan: 350-360 aralığı") ve tahmini bir sıralama (örneğin "Tahmini Sıralama: 50k-60k") ver.
-            Lütfen "Tahmini Puan:" ve "Tahmini Sıralama:" başlıklarını kullanarak bu bilgileri net bir şekilde belirt.
+            
+            Lütfen yanıtını KESİNLİKLE şu başlıklarla yapılandır (her başlık "## " ile başlamalı):
+            ## 📊 Genel Durum ve Puan Tahmini
+            (Burada genel durumu özetle, tahmini puan aralığını ve sıralama aralığını belirt)
+
+            ## ✅ Güçlü Olduğun Alanlar
+            (İyi olduğu dersleri ve konuları listele)
+
+            ## ⚠️ Geliştirmen Gereken Konular
+            (Eksik olduğu veya yanlışın çok olduğu konuları belirt)
+
+            ## 🚀 Çalışma Tavsiyeleri
+            (Netleri artırmak için somut öneriler ver)
+
 Deneme verisi:
 ${body.inputData}`;
         }

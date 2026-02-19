@@ -177,9 +177,35 @@ export default function ExamAnalysis() {
       </form>
 
       {analysis && (
-        <div className="rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--card))] p-6">
-          <h2 className="font-semibold mb-2">Analiz sonucu</h2>
-          <div className="whitespace-pre-wrap text-sm">{analysis}</div>
+        <div className="space-y-6">
+          {analysis.split(/(?=## )/).map((section, index) => {
+            const titleMatch = section.match(/## (.*)/);
+            const title = titleMatch ? titleMatch[1].trim() : (index === 0 ? 'Giriş' : '');
+            const content = section.replace(/## .*/, '').trim();
+
+            if (!content) return null;
+
+            let icon = '📝';
+            let colorClass = 'border-l-4 border-l-[rgb(var(--primary))]';
+
+            if (title.includes('Genel Durum')) { icon = '📊'; colorClass = 'border-l-4 border-l-blue-500'; }
+            else if (title.includes('Güçlü')) { icon = '✅'; colorClass = 'border-l-4 border-l-green-500'; }
+            else if (title.includes('Geliştirmen')) { icon = '⚠️'; colorClass = 'border-l-4 border-l-orange-500'; }
+            else if (title.includes('Tavsiye')) { icon = '🚀'; colorClass = 'border-l-4 border-l-purple-500'; }
+
+            return (
+              <div key={index} className={`rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--card))] p-6 shadow-sm ${colorClass} animate-in slide-in-from-bottom-2 fade-in duration-500`} style={{ animationDelay: `${index * 100}ms` }}>
+                {title && (
+                  <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+                    <span className="text-2xl">{icon}</span> {title}
+                  </h3>
+                )}
+                <div className="whitespace-pre-wrap text-sm leading-relaxed text-[rgb(var(--foreground))]/90">
+                  {content}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
