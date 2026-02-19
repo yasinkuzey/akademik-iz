@@ -15,11 +15,11 @@ const SUBJECTS_BY_EXAM: Record<string, string[]> = {
   middle_school: ['Türkçe', 'Matematik', 'Fen Bilimleri', 'Sosyal Bilgiler', 'İnkılap Tarihi', 'Din Kültürü', 'İngilizce'],
 }
 
-type SubjectScores = Record<string, { dogru: number; yanlis: number; bos: number }>
+type SubjectScores = Record<string, { dogru: number | ''; yanlis: number | ''; bos: number | '' }>
 
 function emptyScores(subjects: string[]): SubjectScores {
   const o: SubjectScores = {}
-  subjects.forEach((s) => { o[s] = { dogru: 0, yanlis: 0, bos: 0 } })
+  subjects.forEach((s) => { o[s] = { dogru: '', yanlis: '', bos: '' } })
   return o
 }
 
@@ -55,10 +55,10 @@ export default function ExamAnalysis() {
     loadHistory()
   }, [user?.id])
 
-  const setSubjectScore = (subject: string, field: 'dogru' | 'yanlis' | 'bos', value: number) => {
+  const setSubjectScore = (subject: string, field: 'dogru' | 'yanlis' | 'bos', value: number | '') => {
     setScores((prev) => ({
       ...prev,
-      [subject]: { ...prev[subject], [field]: Math.max(0, value) },
+      [subject]: { ...prev[subject], [field]: value === '' ? '' : Math.max(0, value) },
     }))
   }
 
@@ -66,7 +66,7 @@ export default function ExamAnalysis() {
     return subjects
       .map((s) => {
         const v = scores[s] ?? { dogru: 0, yanlis: 0, bos: 0 }
-        return `${s}: ${v.dogru} doğru, ${v.yanlis} yanlış, ${v.bos} boş`
+        return `${s}: ${v.dogru || 0} doğru, ${v.yanlis || 0} yanlış, ${v.bos || 0} boş`
       })
       .join('\n')
   }
@@ -137,25 +137,25 @@ export default function ExamAnalysis() {
                   type="number"
                   min={0}
                   value={v.dogru}
-                  onChange={(e) => setSubjectScore(subject, 'dogru', parseInt(e.target.value, 10) || 0)}
+                  onChange={(e) => setSubjectScore(subject, 'dogru', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
                   className="rounded border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-2 py-1 text-sm text-center w-16 justify-self-center"
-                  onFocus={(e) => e.target.select()}
+                  placeholder="0"
                 />
                 <input
                   type="number"
                   min={0}
                   value={v.yanlis}
-                  onChange={(e) => setSubjectScore(subject, 'yanlis', parseInt(e.target.value, 10) || 0)}
+                  onChange={(e) => setSubjectScore(subject, 'yanlis', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
                   className="rounded border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-2 py-1 text-sm text-center w-16 justify-self-center"
-                  onFocus={(e) => e.target.select()}
+                  placeholder="0"
                 />
                 <input
                   type="number"
                   min={0}
                   value={v.bos}
-                  onChange={(e) => setSubjectScore(subject, 'bos', parseInt(e.target.value, 10) || 0)}
+                  onChange={(e) => setSubjectScore(subject, 'bos', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
                   className="rounded border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-2 py-1 text-sm text-center w-16 justify-self-center"
-                  onFocus={(e) => e.target.select()}
+                  placeholder="0"
                 />
               </div>
             )
