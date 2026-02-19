@@ -9,8 +9,6 @@ import logo from '@/assets/logo.png'
 const nav = [
   { to: '/dashboard', label: 'Ana Sayfa' },
   { to: '/study/new', label: 'Çalışma Ekle' },
-  { to: '/study/list', label: 'Çalışmalarım' },
-  { to: '/stats', label: 'İstatistikler' },
   { to: '/exam-analysis', label: 'Deneme Analizi' },
   { to: '/exam-prediction', label: 'Sınav Tahmini' },
   { to: '/tutor', label: 'AI Öğretmen' },
