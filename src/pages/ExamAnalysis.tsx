@@ -103,7 +103,7 @@ export default function ExamAnalysis() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
       <h1 className="text-2xl font-bold">Deneme Analizi</h1>
       <p className="text-[rgb(var(--muted))]">Sınav türünü seç, her ders için doğru / yanlış / boş sayılarını gir. AI eksiklerini ve ne yapman gerektiğini analiz edecek.</p>
 
@@ -166,7 +166,7 @@ export default function ExamAnalysis() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-lg bg-[rgb(var(--accent))] text-white font-medium disabled:opacity-50"
+          className="w-full py-3 rounded-lg bg-[rgb(var(--accent))] text-white font-medium disabled:opacity-50 btn-bounce"
         >
           {loading ? 'Analiz ediliyor...' : 'Analiz et'}
         </button>

@@ -229,7 +229,7 @@ export default function StudyNew() {
           })}
           <button
             type="submit"
-            className="w-full py-3 rounded-lg bg-[rgb(var(--accent))] text-white font-medium hover:opacity-90 transition-opacity"
+            className="w-full py-3 rounded-lg bg-[rgb(var(--accent))] text-white font-medium hover:opacity-90 transition-opacity btn-bounce"
           >
             Cevapları Tamamla
           </button>
@@ -239,7 +239,7 @@ export default function StudyNew() {
   }
 
   return (
-    <div className="max-w-xl mx-auto">
+    <div className="max-w-xl mx-auto animate-in fade-in zoom-in-95 duration-500">
       <h1 className="text-2xl font-bold mb-4">Çalışma Ekle</h1>
       <p className="text-[rgb(var(--muted))] mb-6">Ders, konu ve süreyi gir. AI 4 soru üretecek; 3 veya 4 doğru yaparsan çalışman kaydedilir.</p>
       <form onSubmit={handleGenerateQuestions} className="space-y-4">
@@ -286,7 +286,7 @@ export default function StudyNew() {
         <button
           type="submit"
           disabled={loading || !hours}
-          className="w-full py-3 rounded-lg bg-[rgb(var(--accent))] text-white font-medium disabled:opacity-50"
+          className="w-full py-3 rounded-lg bg-[rgb(var(--accent))] text-white font-medium disabled:opacity-50 btn-bounce"
         >
           {loading ? 'Sorular üretiliyor...' : 'Soruları üret'}
         </button>

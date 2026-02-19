@@ -70,7 +70,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Hoş geldin, {user?.user_metadata?.display_name || 'Öğrenci'} 👋</h1>
@@ -84,7 +84,7 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in zoom-in-95 duration-500 delay-100 fill-mode-forwards">
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <div className="text-3xl font-bold text-foreground">{stats?.total_sessions ?? 0}</div>
           <div className="text-sm font-medium text-muted-foreground mt-1">Tamamlanan Çalışma</div>
@@ -195,7 +195,7 @@ export default function Dashboard() {
             </p>
             <Link
               to="/exam-prediction"
-              className="block w-full py-2 text-center rounded-lg border border-border hover:bg-muted/50 transition-colors text-sm font-medium active:scale-95"
+              className="block w-full py-2 text-center rounded-lg border border-border hover:bg-muted/50 transition-colors text-sm font-medium active:scale-95 btn-bounce"
             >
               Tahmini Gör
             </Link>
