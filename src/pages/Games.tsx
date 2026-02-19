@@ -457,6 +457,7 @@ function ChessGame({ user }: { user: any }) {
         <div className="flex flex-col items-center">
             <h2 className="text-xl font-bold mb-4">{winner ? winner : 'Satranç (Sen: Beyaz)'}</h2>
             <div className="w-[300px] h-[300px] md:w-[400px] md:h-[400px]">
+                {/* @ts-ignore */}
                 <Chessboard position={game.fen()} onPieceDrop={onDrop} />
             </div>
             <button
