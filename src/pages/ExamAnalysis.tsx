@@ -139,6 +139,7 @@ export default function ExamAnalysis() {
                   value={v.dogru}
                   onChange={(e) => setSubjectScore(subject, 'dogru', parseInt(e.target.value, 10) || 0)}
                   className="rounded border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-2 py-1 text-sm text-center w-16 justify-self-center"
+                  onFocus={(e) => e.target.select()}
                 />
                 <input
                   type="number"
@@ -146,6 +147,7 @@ export default function ExamAnalysis() {
                   value={v.yanlis}
                   onChange={(e) => setSubjectScore(subject, 'yanlis', parseInt(e.target.value, 10) || 0)}
                   className="rounded border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-2 py-1 text-sm text-center w-16 justify-self-center"
+                  onFocus={(e) => e.target.select()}
                 />
                 <input
                   type="number"
@@ -153,6 +155,7 @@ export default function ExamAnalysis() {
                   value={v.bos}
                   onChange={(e) => setSubjectScore(subject, 'bos', parseInt(e.target.value, 10) || 0)}
                   className="rounded border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-2 py-1 text-sm text-center w-16 justify-self-center"
+                  onFocus={(e) => e.target.select()}
                 />
               </div>
             )
