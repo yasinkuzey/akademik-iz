@@ -278,6 +278,7 @@ export default function StudyNew() {
             value={hours}
             onChange={(e) => setHours(Number(e.target.value))}
             className="w-full rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-3 py-2"
+            onFocus={(e) => e.target.select()}
           />
         </div>
         <button

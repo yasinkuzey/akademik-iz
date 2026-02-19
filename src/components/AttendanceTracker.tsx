@@ -12,6 +12,7 @@ interface Course {
 export default function AttendanceTracker() {
     const [courses, setCourses] = useLocalStorage<Course[]>('attendance-courses', [])
     const [newCourseName, setNewCourseName] = useState('')
+    const [showAddForm, setShowAddForm] = useState(false)
 
     const addCourse = (e: React.FormEvent) => {
         e.preventDefault()
@@ -52,26 +53,71 @@ export default function AttendanceTracker() {
     return (
         <div className="space-y-6">
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <span>📅</span> Devamsızlık Takibi
-                </h2>
-
-                <form onSubmit={addCourse} className="flex gap-4 mb-6">
-                    <input
-                        type="text"
-                        value={newCourseName}
-                        onChange={(e) => setNewCourseName(e.target.value)}
-                        placeholder="Ders adı girin (Örn: Siber Güvenliğe Giriş)..."
-                        className="flex-1 px-4 py-2 rounded-lg bg-background border border-border focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all placeholder:text-muted"
-                    />
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold flex items-center gap-2">
+                        <span>📅</span> Devamsızlık Takibi
+                    </h2>
                     <button
-                        type="submit"
-                        disabled={!newCourseName.trim()}
-                        className="px-6 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => setShowAddForm(!showAddForm)}
+                        className="text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1 bg-primary/10 px-3 py-1.5 rounded-full"
                     >
-                        Ekle
+                        {showAddForm ? 'Kapat' : '+ Ders Ekle'}
                     </button>
-                </form>
+                </div>
+
+                {showAddForm && (
+                    <div className="bg-muted/30 p-4 rounded-xl mb-6 animate-in slide-in-from-top-2 fade-in duration-300">
+                        <div className="mb-4">
+                            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">Hızlı Ekle:</span>
+                            <div className="flex flex-wrap gap-2">
+                                {['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Türkçe', 'Tarih', 'Coğrafya', 'Felsefe', 'İngilizce'].map(subject => (
+                                    <button
+                                        key={subject}
+                                        onClick={() => {
+                                            const newCourse: Course = {
+                                                id: crypto.randomUUID(),
+                                                name: subject,
+                                                weeks: Array(14).fill('empty'),
+                                            }
+                                            setCourses([...courses, newCourse])
+                                            setShowAddForm(false)
+                                        }}
+                                        className="px-3 py-1 bg-background border border-border rounded-full text-sm hover:border-accent hover:text-accent transition-colors"
+                                    >
+                                        + {subject}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-border" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-background px-2 text-muted-foreground">Veya kendin yaz</span>
+                            </div>
+                        </div>
+
+                        <form onSubmit={addCourse} className="flex flex-col sm:flex-row gap-4 mt-4">
+                            <input
+                                type="text"
+                                value={newCourseName}
+                                onChange={(e) => setNewCourseName(e.target.value)}
+                                placeholder="Ders adı girin..."
+                                className="flex-1 px-4 py-2 rounded-lg bg-background border border-border focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all placeholder:text-muted"
+                                autoFocus
+                            />
+                            <button
+                                type="submit"
+                                disabled={!newCourseName.trim()}
+                                className="px-6 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:opacity-90 transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed btn-bounce"
+                            >
+                                Ekle
+                            </button>
+                        </form>
+                    </div>
+                )}
 
                 <div className="space-y-4">
                     {courses.length === 0 && (
@@ -125,24 +171,26 @@ export default function AttendanceTracker() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-7 md:grid-cols-14 gap-2">
-                                    {course.weeks.map((status, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() => toggleWeek(course.id, index)}
-                                            title={`${index + 1}. Hafta: ${status === 'present' ? 'Geldi' : status === 'absent' ? 'Gelmedi' : 'Belirsiz'}`}
-                                            className={`
-                        aspect-square md:aspect-auto md:h-10 rounded-md flex items-center justify-center text-xs font-medium transition-all duration-200
-                        ${status === 'empty' ? 'bg-secondary text-muted hover:bg-border' : ''}
-                        ${status === 'present' ? 'bg-success/10 text-success border border-success/20' : ''}
-                        ${status === 'absent' ? 'bg-destructive/10 text-destructive border border-destructive/20' : ''}
-                      `}
-                                        >
-                                            {status === 'empty' && (index + 1)}
-                                            {status === 'present' && '✓'}
-                                            {status === 'absent' && '✗'}
-                                        </button>
-                                    ))}
+                                <div className="overflow-x-auto pb-2">
+                                    <div className="grid grid-cols-14 gap-2 min-w-[500px] md:min-w-0">
+                                        {course.weeks.map((status, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => toggleWeek(course.id, index)}
+                                                title={`${index + 1}. Hafta: ${status === 'present' ? 'Geldi' : status === 'absent' ? 'Gelmedi' : 'Belirsiz'}`}
+                                                className={`
+                            h-8 w-8 md:h-10 md:w-auto rounded-md flex items-center justify-center text-xs font-medium transition-all duration-200 shrink-0
+                            ${status === 'empty' ? 'bg-secondary text-muted hover:bg-border' : ''}
+                            ${status === 'present' ? 'bg-success/10 text-success border border-success/20' : ''}
+                            ${status === 'absent' ? 'bg-destructive/10 text-destructive border border-destructive/20' : ''}
+                          `}
+                                            >
+                                                {status === 'empty' && (index + 1)}
+                                                {status === 'present' && '✓'}
+                                                {status === 'absent' && '✗'}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         )
