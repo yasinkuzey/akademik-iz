@@ -401,69 +401,79 @@ function Sudoku({ user }: { user: any }) {
 }
 
 // --- Chess (New) ---
+// --- Chess (New) ---
 function ChessGame({ user }: { user: any }) {
     const [game, setGame] = useState(new Chess())
-
     const [winner, setWinner] = useState<string | null>(null)
+    const [isAiThinking, setIsAiThinking] = useState(false)
 
-    function makeAMove(move: any) {
-        const gameCopy = new Chess(game.fen())
-        try {
-            const result = gameCopy.move(move)
-            setGame(gameCopy)
-            return result
-        } catch (error) {
-            return null
+    // AI Move Effect
+    useEffect(() => {
+        if (game.turn() === 'b' && !winner && !game.isGameOver()) {
+            setIsAiThinking(true)
+            const timeout = setTimeout(() => {
+                const possibleMoves = game.moves()
+                if (possibleMoves.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * possibleMoves.length)
+                    const gameCopy = new Chess(game.fen())
+                    gameCopy.move(possibleMoves[randomIndex])
+                    setGame(gameCopy)
+
+                    if (gameCopy.isGameOver()) {
+                        if (gameCopy.isCheckmate()) setWinner('Yapay Zeka Kazandı 🤖')
+                        else setWinner('Berabere 🤝')
+                    }
+                }
+                setIsAiThinking(false)
+            }, 100) // Reduced delay for faster response
+            return () => clearTimeout(timeout)
         }
-    }
+    }, [game, winner])
 
     function onDrop(sourceSquare: string, targetSquare: string) {
-        if (game.isGameOver() || winner) return false
+        if (game.turn() !== 'w' || winner) return false
 
-        const move = makeAMove({
-            from: sourceSquare,
-            to: targetSquare,
-            promotion: 'q',
-        })
+        const gameCopy = new Chess(game.fen())
+        try {
+            const move = gameCopy.move({
+                from: sourceSquare,
+                to: targetSquare,
+                promotion: 'q', // always promote to queen for simplicity
+            })
 
-        if (move === null) return false
+            // if illegal move
+            if (move === null) return false
 
-        if (game.isGameOver()) {
-            if (game.isCheckmate()) {
-                setWinner('Sen Kazandın! 🎉')
-                if (user) addPointsIfQualified(user.id, 'chess_wins', 2, 5)
-            } else {
-                setWinner('Berabere 🤝')
+            setGame(gameCopy)
+
+            if (gameCopy.isGameOver()) {
+                if (gameCopy.isCheckmate()) {
+                    setWinner('Sen Kazandın! 🎉')
+                    if (user) addPointsIfQualified(user.id, 'chess_wins', 2, 5)
+                } else {
+                    setWinner('Berabere 🤝')
+                }
             }
             return true
+        } catch (error) {
+            return false
         }
-
-        // Random AI Move
-        setTimeout(() => {
-            const possibleMoves = game.moves()
-            if (game.isGameOver() || possibleMoves.length === 0) return
-            const randomIndex = Math.floor(Math.random() * possibleMoves.length)
-            makeAMove(possibleMoves[randomIndex])
-
-            if (game.isCheckmate()) {
-                setWinner('Yapay Zeka Kazandı 🤖')
-            }
-        }, 200)
-
-        return true
     }
 
     return (
         <div className="flex flex-col items-center">
-            <h2 className="text-xl font-bold mb-4">{winner ? winner : 'Satranç (Sen: Beyaz)'}</h2>
+            <h2 className="text-xl font-bold mb-4">
+                {winner ? winner : (isAiThinking ? 'Yapay Zeka Düşünüyor... 🤔' : 'Satranç (Sen: Beyaz)')}
+            </h2>
             <div className="w-[300px] h-[300px] md:w-[400px] md:h-[400px]">
                 {/* @ts-ignore */}
-                <Chessboard position={game.fen()} onPieceDrop={onDrop} />
+                <Chessboard position={game.fen()} onPieceDrop={onDrop} boardOrientation="white" />
             </div>
             <button
                 onClick={() => {
                     setGame(new Chess())
                     setWinner(null)
+                    setIsAiThinking(false)
                 }}
                 className="mt-6 px-4 py-2 bg-[rgb(var(--primary))] text-white rounded-lg btn-bounce"
             >
