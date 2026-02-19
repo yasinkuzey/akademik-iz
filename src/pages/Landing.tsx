@@ -43,7 +43,7 @@ export default function Landing() {
       <nav className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-xl text-primary tracking-tight">
-            <img src={logo} alt="Logo" className="w-8 h-8 object-contain" />
+            <img src={logo} alt="Logo" className="w-8 h-8 object-contain rounded-full" />
             <span>AKADEMİK İZ</span>
           </div>
           <div className="flex gap-4">
@@ -120,7 +120,7 @@ export default function Landing() {
       <footer className="border-t border-border mt-auto">
         <div className="container py-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="Logo" className="w-8 h-8 opacity-80" />
+            <img src={logo} alt="Logo" className="w-8 h-8 opacity-80 rounded-full" />
             <span className="text-sm font-semibold text-muted-foreground">Akademik İz &copy; 2024</span>
           </div>
           <div className="flex gap-6 text-sm text-muted-foreground">

@@ -50,7 +50,7 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-20 items-center justify-between">
           <Link to="/dashboard" className="flex items-center gap-3 font-bold text-xl text-primary tracking-tight btn-bounce">
-            <img src={logo} alt="Logo" className="w-12 h-12 object-contain" />
+            <img src={logo} alt="Logo" className="w-12 h-12 object-contain rounded-full" />
             <span className="hidden sm:inline">AKADEMİK İZ</span>
           </Link>
 
@@ -61,8 +61,8 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
                 key={to}
                 to={to}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 btn-bounce ${location.pathname === to
-                    ? 'bg-accent text-accent-foreground shadow-sm'
-                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                  ? 'bg-accent text-accent-foreground shadow-sm'
+                  : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                   }`}
               >
                 {label}
@@ -103,8 +103,8 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
               key={to}
               to={to}
               className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors btn-bounce ${location.pathname === to
-                  ? 'text-accent'
-                  : 'text-muted-foreground hover:text-foreground'
+                ? 'text-accent'
+                : 'text-muted-foreground hover:text-foreground'
                 }`}
             >
               <span className="text-xl">{icon}</span>
