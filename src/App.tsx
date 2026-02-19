@@ -12,6 +12,7 @@ import ExamAnalysis from './pages/ExamAnalysis'
 import ExamPrediction from './pages/ExamPrediction'
 import Tutor from './pages/Tutor'
 import Leaderboard from './pages/Leaderboard'
+import AttendancePage from './pages/AttendancePage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -37,6 +38,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <Layout><Dashboard /></Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/attendance-tracker"
+        element={
+          <ProtectedRoute>
+            <Layout><AttendancePage /></Layout>
           </ProtectedRoute>
         }
       />

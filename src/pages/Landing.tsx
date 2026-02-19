@@ -104,23 +104,30 @@ export default function Landing() {
             <div className="space-y-4">
               <div className="bg-card border border-border p-6 rounded-2xl shadow-xl">
                 <div className="text-3xl mb-2">🤖</div>
-                <h3 className="font-bold text-foreground">AI Öğretmen</h3>
-                <p className="text-xs text-muted-foreground">7/24 sorularını sor, anında öğren.</p>
+                <h3 className="font-bold text-foreground">AI Koç</h3>
+                <p className="text-xs text-muted-foreground">Sana özel tavsiyeler al.</p>
               </div>
               <div className="bg-card border border-border p-6 rounded-2xl shadow-xl">
-                <div className="text-3xl mb-2">📈</div>
-                <h3 className="font-bold text-foreground">Sınav Tahmini</h3>
-                <p className="text-xs text-muted-foreground">Performansına göre sıralamanı gör.</p>
+                <div className="text-3xl mb-2">🎯</div>
+                <h3 className="font-bold text-foreground">Hedef Takip</h3>
+                <p className="text-xs text-muted-foreground">İlerlemeyi anlık gör.</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="border-t border-border py-8 bg-muted/20">
-        <div className="container text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Akademik İz. Tüm hakları saklıdır.</p>
+      <footer className="border-t border-border mt-auto">
+        <div className="container py-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="Logo" className="w-8 h-8 opacity-80" />
+            <span className="text-sm font-semibold text-muted-foreground">Akademik İz &copy; 2024</span>
+          </div>
+          <div className="flex gap-6 text-sm text-muted-foreground">
+            <a href="#" className="hover:text-foreground transition-colors">Hakkımızda</a>
+            <a href="#" className="hover:text-foreground transition-colors">Gizlilik</a>
+            <a href="#" className="hover:text-foreground transition-colors">İletişim</a>
+          </div>
         </div>
       </footer>
     </div>

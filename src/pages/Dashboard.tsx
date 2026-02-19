@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import AttendanceTracker from '@/components/AttendanceTracker'
 
 type SessionRow = { id: string; subject: string; topic: string; hours: number; created_at: string }
 type StatsRow = { total_sessions: number; total_hours: number; total_correct: number; total_wrong: number; total_blank: number; quiz_count: number }
@@ -79,7 +78,7 @@ export default function Dashboard() {
         </div>
         <Link
           to="/study/new"
-          className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
+          className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 transition-transform active:scale-95 hover:scale-105"
         >
           + Yeni Çalışma Ekle
         </Link>
@@ -112,8 +111,6 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content Area */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Attendance Tracker Section */}
-          <AttendanceTracker />
 
           {/* Recent Sessions */}
           <div className="space-y-4">
@@ -164,8 +161,25 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Sidebar Area (Future Widgets) */}
+        {/* Sidebar Area */}
         <div className="space-y-6">
+          {/* Attendance Quick Access */}
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg">Devamsızlık Durumu</h3>
+              <span className="text-2xl">📅</span>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Derslerinin katılım durumunu kontrol et ve güncelle.
+            </p>
+            <Link
+              to="/attendance-tracker"
+              className="block w-full py-2 text-center rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-all active:scale-95 text-sm font-medium"
+            >
+              Takibi Aç
+            </Link>
+          </div>
+
           {/* Motivational Card Example */}
           <div className="rounded-xl border border-border bg-gradient-to-br from-primary to-primary/80 p-6 text-primary-foreground shadow-lg">
             <h3 className="font-bold text-lg mb-2">Günün Sözü</h3>
@@ -181,7 +195,7 @@ export default function Dashboard() {
             </p>
             <Link
               to="/exam-prediction"
-              className="block w-full py-2 text-center rounded-lg border border-border hover:bg-muted/50 transition-colors text-sm font-medium"
+              className="block w-full py-2 text-center rounded-lg border border-border hover:bg-muted/50 transition-colors text-sm font-medium active:scale-95"
             >
               Tahmini Gör
             </Link>

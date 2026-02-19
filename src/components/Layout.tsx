@@ -8,6 +8,7 @@ import logo from '@/assets/logo.png'
 
 const nav = [
   { to: '/dashboard', label: 'Ana Sayfa' },
+  { to: '/attendance-tracker', label: 'Devamsızlık Takibi' },
   { to: '/study/new', label: 'Çalışma Ekle' },
   { to: '/exam-analysis', label: 'Deneme Analizi' },
   { to: '/exam-prediction', label: 'Sınav Tahmini' },
@@ -37,9 +38,9 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
   // Mobile Bottom Navigation items (subset of full nav)
   const mobileNav = [
     { to: '/dashboard', label: 'Ana Sayfa', icon: '🏠' },
+    { to: '/attendance-tracker', label: 'Devamsızlık', icon: '📅' },
     { to: '/study/new', label: 'Ekle', icon: '➕' },
     { to: '/exam-analysis', label: 'Deneme', icon: '📝' },
-    { to: '/exam-prediction', label: 'Tahmin', icon: '🎯' },
     { to: '/tutor', label: 'AI', icon: '🤖' },
   ]
 
@@ -47,19 +48,19 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
     <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background text-foreground transition-colors duration-300">
       {/* Top Header */}
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Link to="/dashboard" className="flex items-center gap-2 font-bold text-xl text-primary tracking-tight">
-            <img src={logo} alt="Logo" className="w-8 h-8 object-contain" />
-            <span>AKADEMİK İZ</span>
+        <div className="container flex h-20 items-center justify-between">
+          <Link to="/dashboard" className="flex items-center gap-3 font-bold text-xl text-primary tracking-tight btn-bounce">
+            <img src={logo} alt="Logo" className="w-12 h-12 object-contain" />
+            <span className="hidden sm:inline">AKADEMİK İZ</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-3">
             {nav.map(({ to, label }) => (
               <Link
                 key={to}
                 to={to}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${location.pathname === to
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 btn-bounce ${location.pathname === to
                     ? 'bg-accent text-accent-foreground shadow-sm'
                     : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                   }`}
@@ -73,7 +74,7 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
             <button
               type="button"
               onClick={toggle}
-              className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors btn-bounce"
               title={dark ? 'Açık tema' : 'Koyu tema'}
             >
               {dark ? '☀️' : '🌙'}
@@ -81,7 +82,7 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
             <button
               type="button"
               onClick={handleLogout}
-              className="px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg transition-colors btn-bounce"
             >
               Çıkış
             </button>
@@ -101,7 +102,7 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
             <Link
               key={to}
               to={to}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${location.pathname === to
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors btn-bounce ${location.pathname === to
                   ? 'text-accent'
                   : 'text-muted-foreground hover:text-foreground'
                 }`}
