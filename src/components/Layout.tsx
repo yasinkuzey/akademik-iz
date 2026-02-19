@@ -44,24 +44,24 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
   ]
 
   return (
-    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background text-foreground transition-colors duration-300">
       {/* Top Header */}
-      <header className="sticky top-0 z-10 border-b border-[rgb(var(--border))] bg-[rgb(var(--card))]">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <Link to="/dashboard" className="flex items-center gap-2 font-bold text-lg text-[rgb(var(--accent))] truncate">
-            <img src={logo} alt="Logo" className="w-8 h-8 object-contain rounded-full" />
+      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center justify-between">
+          <Link to="/dashboard" className="flex items-center gap-2 font-bold text-xl text-primary tracking-tight">
+            <img src={logo} alt="Logo" className="w-8 h-8 object-contain" />
             <span>AKADEMİK İZ</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex flex-wrap items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1">
             {nav.map(({ to, label }) => (
               <Link
                 key={to}
                 to={to}
-                className={`px-3 py-1.5 rounded-md text-sm transition-colors ${location.pathname === to
-                  ? 'bg-[rgb(var(--accent))] text-white'
-                  : 'text-[rgb(var(--muted))] hover:bg-[rgb(var(--border))] hover:text-[rgb(var(--fg))]'
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${location.pathname === to
+                    ? 'bg-accent text-accent-foreground shadow-sm'
+                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                   }`}
               >
                 {label}
@@ -73,7 +73,7 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
             <button
               type="button"
               onClick={toggle}
-              className="p-2 rounded-full hover:bg-[rgb(var(--border))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"
+              className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
               title={dark ? 'Açık tema' : 'Koyu tema'}
             >
               {dark ? '☀️' : '🌙'}
@@ -81,7 +81,7 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
             <button
               type="button"
               onClick={handleLogout}
-              className="text-sm font-medium text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"
+              className="px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
             >
               Çıkış
             </button>
@@ -90,29 +90,26 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
+      <main className="flex-1 container py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         {children}
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[rgb(var(--card))] border-t border-[rgb(var(--border))] z-50">
-        <div className="flex justify-around items-center h-16">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-lg border-t border-border z-50 safe-area-bottom">
+        <div className="flex justify-around items-center h-16 px-2">
           {mobileNav.map(({ to, label, icon }) => (
             <Link
               key={to}
               to={to}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${location.pathname === to
-                ? 'text-[rgb(var(--accent))]'
-                : 'text-[rgb(var(--muted))]'
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${location.pathname === to
+                  ? 'text-accent'
+                  : 'text-muted-foreground hover:text-foreground'
                 }`}
             >
               <span className="text-xl">{icon}</span>
               <span className="text-[10px] font-medium">{label}</span>
             </Link>
           ))}
-          {/* 'More' button for items that didn't fit (optional, linking to a menu page or just listing more) 
-              For now keeping it simple with the most important ones.
-          */}
         </div>
       </div>
     </div>
