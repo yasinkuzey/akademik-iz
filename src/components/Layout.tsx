@@ -14,6 +14,7 @@ const nav = [
   { to: '/exam-prediction', label: 'Sınav Tahmini' },
   { to: '/tutor', label: 'AI Öğretmen' },
   { to: '/leaderboard', label: 'Liderlik' },
+  { to: '/games', label: 'Oyunlar 🎮' },
 ]
 
 export default function Layout({ children }: { children?: React.ReactNode }) {
@@ -42,6 +43,7 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
     { to: '/study/new', label: 'Ekle', icon: '➕' },
     { to: '/exam-analysis', label: 'Deneme', icon: '📝' },
     { to: '/tutor', label: 'AI', icon: '🤖' },
+    { to: '/games', label: 'Oyun', icon: '🎮' },
   ]
 
   return (

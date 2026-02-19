@@ -13,6 +13,7 @@ import ExamPrediction from './pages/ExamPrediction'
 import Tutor from './pages/Tutor'
 import Leaderboard from './pages/Leaderboard'
 import AttendancePage from './pages/AttendancePage'
+import Games from './pages/Games'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -102,6 +103,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <Layout><Leaderboard /></Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/games"
+        element={
+          <ProtectedRoute>
+            <Layout><Games /></Layout>
           </ProtectedRoute>
         }
       />

@@ -6,11 +6,35 @@ import { supabase } from '@/lib/supabase'
 type SessionRow = { id: string; subject: string; topic: string; hours: number; created_at: string }
 type StatsRow = { total_sessions: number; total_hours: number; total_correct: number; total_wrong: number; total_blank: number; quiz_count: number }
 
+// Quotes collection
+const QUOTES = [
+  { text: "Başarı, her gün tekrarlanan küçük çabaların toplamıdır.", author: "Robert Collier" },
+  { text: "Gelecek, onu bugün hazırlayanlara aittir.", author: "Malcolm X" },
+  { text: "Eğitim, dünyayı değiştirmek için kullanabileceğiniz en güçlü silahtır.", author: "Nelson Mandela" },
+  { text: "Zorluklar, başarının değerini artıran süslerdir.", author: "Moliere" },
+  { text: "Hiçbir şeye cesaret edemeyen, hiçbir şeye ümit beslemesin.", author: "Schiller" },
+  { text: "Başlamak için mükemmel olmak zorunda değilsin, ama mükemmel olmak için başlamak zorundasın.", author: "Zig Ziglar" },
+  { text: "Hayallerinizin peşinden gidin, onlar yolu biliyorlar.", author: "Kobe Bryant" },
+  { text: "Bugün yapmadıklarınız yüzünden yarın pişman olabilirsiniz.", author: "Anonim" },
+  { text: "Bilgiye yapılan yatırım en yüksek faizi getirir.", author: "Benjamin Franklin" },
+  { text: "Yarınlar yorgun ve bezgin kimselere değil, rahatını terk edebilen gayretli insanlara aittir.", author: "Cicero" },
+  { text: "Vazgeçmek için her zaman çok erkendir.", author: "Norman Vincent Peale" },
+  { text: "En büyük zafer düşmemek değil, her düştüğünde kalkabilmektir.", author: "Konfüçyüs" },
+  { text: "Sadece durmayanlar hedefe ulaşır.", author: "Mevlana" },
+  { text: "Başarı tesadüf değildir.", author: "Pele" },
+  { text: "Çalışmadan, yorulmadan, öğrenmeden rahat yaşama yollarını aramayı alışkanlık haline getirmiş milletler, önce haysiyetlerini, sonra hürriyetlerini ve daha sonra istikballerini kaybetmeye mahkumdurlar.", author: "Mustafa Kemal Atatürk" },
+]
+
 export default function Dashboard() {
   const { user } = useAuth()
   const [sessions, setSessions] = useState<SessionRow[]>([])
   const [stats, setStats] = useState<StatsRow | null>(null)
   const [loading, setLoading] = useState(true)
+
+  // Select daily quote
+  const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24)
+  const quoteIndex = dayOfYear % QUOTES.length
+  const todayQuote = QUOTES[quoteIndex]
 
   useEffect(() => {
     if (!user?.id) return
@@ -180,11 +204,11 @@ export default function Dashboard() {
             </Link>
           </div>
 
-          {/* Motivational Card Example */}
+          {/* Motivational Card - Daily Quote */}
           <div className="rounded-xl border border-border bg-gradient-to-br from-primary to-primary/80 p-6 text-primary-foreground shadow-lg">
             <h3 className="font-bold text-lg mb-2">Günün Sözü</h3>
-            <p className="text-primary-foreground/90 italic">"Başarı, her gün tekrarlanan küçük çabaların toplamıdır."</p>
-            <div className="mt-4 text-sm text-primary-foreground/70">- Robert Collier</div>
+            <p className="text-primary-foreground/90 italic">"{todayQuote.text}"</p>
+            <div className="mt-4 text-sm text-primary-foreground/70">- {todayQuote.author}</div>
           </div>
 
           {/* Quick Stats or Promo */}

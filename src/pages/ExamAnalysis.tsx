@@ -6,12 +6,16 @@ import { callGemini } from '@/lib/api'
 const EXAM_TYPES = [
   { value: 'tyt', label: 'TYT' },
   { value: 'ayt', label: 'AYT' },
+  { value: 'kpss', label: 'KPSS' },
+  { value: 'ales', label: 'ALES' },
   { value: 'middle_school', label: 'Ortaokul (LGS)' },
 ]
 
 const SUBJECTS_BY_EXAM: Record<string, string[]> = {
   tyt: ['Türkçe', 'Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü'],
   ayt: ['Matematik', 'Edebiyat', 'Fizik', 'Kimya', 'Biyoloji', 'Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü'],
+  kpss: ['Genel Yetenek (Türkçe)', 'Genel Yetenek (Matematik)', 'Genel Kültür (Tarih)', 'Genel Kültür (Coğrafya)', 'Genel Kültür (Vatandaşlık)'],
+  ales: ['Sayısal 1', 'Sayısal 2', 'Sözel 1', 'Sözel 2'],
   middle_school: ['Türkçe', 'Matematik', 'Fen Bilimleri', 'Sosyal Bilgiler', 'İnkılap Tarihi', 'Din Kültürü', 'İngilizce'],
 }
 

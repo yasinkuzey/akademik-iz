@@ -39,13 +39,25 @@ export default function Leaderboard() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, i) => (
-                <tr key={i} className="border-b border-[rgb(var(--border))]">
-                  <td className="p-3 font-medium">{r.rank ?? i + 1}</td>
-                  <td className="p-3">{r.display_name || 'Anonim'}</td>
-                  <td className="p-3 text-right">{r.total_points ?? 0}</td>
-                </tr>
-              ))}
+              {rows.map((r, i) => {
+                let rankDisplay: React.ReactNode = r.rank ?? i + 1
+                if (i === 0) rankDisplay = <span className="text-xl">🥇</span>
+                else if (i === 1) rankDisplay = <span className="text-xl">🥈</span>
+                else if (i === 2) rankDisplay = <span className="text-xl">🥉</span>
+
+                return (
+                  <tr key={i} className="border-b border-[rgb(var(--border))] hover:bg-[rgb(var(--muted))]/5 transition-colors">
+                    <td className="p-3 font-medium text-center">{rankDisplay}</td>
+                    <td className="p-3 flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-[rgb(var(--muted))] flex items-center justify-center text-xs text-[rgb(var(--bg))] font-bold">
+                        {(r.display_name || 'A')[0].toUpperCase()}
+                      </div>
+                      {r.display_name || 'Anonim'}
+                    </td>
+                    <td className="p-3 text-right font-bold text-[rgb(var(--accent))]">{r.total_points ?? 0} Puan</td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
           {rows.length === 0 && (
