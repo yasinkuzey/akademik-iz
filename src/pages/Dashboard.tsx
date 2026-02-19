@@ -70,7 +70,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
+    <div className="space-y-8 animate-in fade-in zoom-in-90 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Hoş geldin, {user?.user_metadata?.display_name || 'Öğrenci'} 👋</h1>

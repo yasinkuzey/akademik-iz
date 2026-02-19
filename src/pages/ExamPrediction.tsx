@@ -41,7 +41,7 @@ export default function ExamPrediction() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in zoom-in-90 duration-700">
       <h1 className="text-2xl font-bold">Sınav Tahmini</h1>
       <p className="text-[rgb(var(--muted))]">Sınıfını ve müfredat/konularını yaz. AI ne çalışman gerektiğini ve sınavda neler çıkabileceğini yazacak.</p>
 
@@ -71,7 +71,7 @@ export default function ExamPrediction() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-lg bg-[rgb(var(--accent))] text-white font-medium disabled:opacity-50"
+          className="w-full py-3 rounded-lg bg-[rgb(var(--accent))] text-white font-medium disabled:opacity-50 btn-bounce"
         >
           {loading ? 'Tahmin yapılıyor...' : 'Tahmin al'}
         </button>

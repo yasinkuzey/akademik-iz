@@ -239,7 +239,7 @@ export default function StudyNew() {
   }
 
   return (
-    <div className="max-w-xl mx-auto animate-in fade-in zoom-in-95 duration-500">
+    <div className="max-w-xl mx-auto animate-in fade-in zoom-in-90 duration-700">
       <h1 className="text-2xl font-bold mb-4">Çalışma Ekle</h1>
       <p className="text-[rgb(var(--muted))] mb-6">Ders, konu ve süreyi gir. AI 4 soru üretecek; 3 veya 4 doğru yaparsan çalışman kaydedilir.</p>
       <form onSubmit={handleGenerateQuestions} className="space-y-4">
