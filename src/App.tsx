@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { SpeedInsights } from "@vercel/speed-insights/react"
 import { useAuth } from './hooks/useAuth'
 import Layout from './components/Layout'
 import Landing from './pages/Landing'
@@ -30,91 +31,94 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Layout><Dashboard /></Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/attendance-tracker"
-        element={
-          <ProtectedRoute>
-            <Layout><AttendancePage /></Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/study/new"
-        element={
-          <ProtectedRoute>
-            <Layout><StudyNew /></Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/study/list"
-        element={
-          <ProtectedRoute>
-            <Layout><StudyList /></Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/stats"
-        element={
-          <ProtectedRoute>
-            <Layout><Stats /></Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/exam-analysis"
-        element={
-          <ProtectedRoute>
-            <Layout><ExamAnalysis /></Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/exam-prediction"
-        element={
-          <ProtectedRoute>
-            <Layout><ExamPrediction /></Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/tutor"
-        element={
-          <ProtectedRoute>
-            <Layout><Tutor /></Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/leaderboard"
-        element={
-          <ProtectedRoute>
-            <Layout><Leaderboard /></Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/games"
-        element={
-          <ProtectedRoute>
-            <Layout><Games /></Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <SpeedInsights />
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Layout><Dashboard /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/attendance-tracker"
+          element={
+            <ProtectedRoute>
+              <Layout><AttendancePage /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/study/new"
+          element={
+            <ProtectedRoute>
+              <Layout><StudyNew /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/study/list"
+          element={
+            <ProtectedRoute>
+              <Layout><StudyList /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stats"
+          element={
+            <ProtectedRoute>
+              <Layout><Stats /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/exam-analysis"
+          element={
+            <ProtectedRoute>
+              <Layout><ExamAnalysis /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/exam-prediction"
+          element={
+            <ProtectedRoute>
+              <Layout><ExamPrediction /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tutor"
+          element={
+            <ProtectedRoute>
+              <Layout><Tutor /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/leaderboard"
+          element={
+            <ProtectedRoute>
+              <Layout><Leaderboard /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/games"
+          element={
+            <ProtectedRoute>
+              <Layout><Games /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   )
 }

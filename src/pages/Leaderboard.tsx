@@ -9,14 +9,26 @@ export default function Leaderboard() {
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('display_name, total_points')
-        .order('total_points', { ascending: false })
-        .limit(50)
-      const list = (data ?? []).map((r, i) => ({ ...r, rank: i + 1 })) as Row[]
-      setRows(list)
-      setLoading(false)
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('display_name, total_points')
+          .order('total_points', { ascending: false })
+          .limit(50)
+
+        if (error) {
+          console.error('Error fetching leaderboard:', error)
+          return
+        }
+
+        console.log('Leaderboard data:', data)
+        const list = (data ?? []).map((r, i) => ({ ...r, rank: i + 1 })) as Row[]
+        setRows(list)
+      } catch (err) {
+        console.error('Unexpected error:', err)
+      } finally {
+        setLoading(false)
+      }
     }
     fetchLeaderboard()
   }, [])

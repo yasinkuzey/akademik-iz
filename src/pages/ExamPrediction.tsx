@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { callGemini } from '@/lib/api'
@@ -10,6 +10,21 @@ export default function ExamPrediction() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [prediction, setPrediction] = useState('')
+  const [history, setHistory] = useState<{ id: string; created_at: string; prediction_text: string; grade: string }[]>([])
+
+  useEffect(() => {
+    // Load history
+    const fetchHistory = async () => {
+      if (!user) return
+      const { data } = await supabase
+        .from('exam_predictions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+      if (data) setHistory(data)
+    }
+    fetchHistory()
+  }, [user])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,6 +47,17 @@ export default function ExamPrediction() {
           curriculum_input: curriculum.trim(),
           prediction_text: text,
         })
+
+        // Add to local history immediately
+        setHistory((prev) => [
+          {
+            id: Date.now().toString(),
+            created_at: new Date().toISOString(),
+            prediction_text: text,
+            grade: grade.trim(),
+          },
+          ...prev,
+        ])
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Bir hata oluştu')
@@ -81,6 +107,28 @@ export default function ExamPrediction() {
         <div className="rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--card))] p-6">
           <h2 className="font-semibold mb-2">Tahmin ve öneriler</h2>
           <div className="whitespace-pre-wrap text-sm">{prediction}</div>
+        </div>
+      )}
+
+      {/* History Section */}
+      {history.length > 0 && (
+        <div className="space-y-4 pt-8 border-t border-[rgb(var(--border))]">
+          <h2 className="text-xl font-bold">Geçmiş Tahminler</h2>
+          <div className="grid gap-4">
+            {history.map((item) => (
+              <div key={item.id} className="rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--card))]/50 p-4 text-sm">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="font-medium text-[rgb(var(--accent))]">{item.grade}</span>
+                  <span className="text-xs text-[rgb(var(--muted))]">
+                    {new Date(item.created_at).toLocaleDateString('tr-TR')}
+                  </span>
+                </div>
+                <div className="whitespace-pre-wrap line-clamp-3 hover:line-clamp-none transition-all cursor-pointer">
+                  {item.prediction_text}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
