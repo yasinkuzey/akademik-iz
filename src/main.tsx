@@ -4,6 +4,8 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './index.css'
 
+import { LanguageProvider } from './hooks/useLanguage'
+
 if (localStorage.getItem('theme') === 'dark') {
   document.documentElement.classList.add('dark')
 } else {
@@ -13,7 +15,9 @@ if (localStorage.getItem('theme') === 'dark') {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <LanguageProvider>
+        <App />
+      </LanguageProvider>
     </BrowserRouter>
   </StrictMode>,
 )

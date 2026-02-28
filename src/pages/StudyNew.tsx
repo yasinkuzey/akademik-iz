@@ -1,58 +1,69 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useLanguage } from '@/hooks/useLanguage'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
-import { callGemini } from '@/lib/api'
+import { useAI } from '@/hooks/useAI'
+import { AIDebugPanel } from '@/components/AIDebugPanel'
 
-const SUBJECTS = ['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Türkçe', 'Tarih', 'Coğrafya', 'Diğer']
+const SUBJECTS = ['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Türkçe', 'Tarih', 'Coğrafya', 'Felsefe', 'İngilizce', 'Diğer']
+const SUBJECT_MAP_EN: Record<string, string> = {
+  'Matematik': 'Math', 'Fizik': 'Physics', 'Kimya': 'Chemistry', 'Biyoloji': 'Biology',
+  'Türkçe': 'Turkish', 'Tarih': 'History', 'Coğrafya': 'Geography', 'Felsefe': 'Philosophy',
+  'İngilizce': 'English', 'Diğer': 'Other'
+}
 
-export type QuizQuestion = { question: string; correctAnswer: string; order: number }
+export type QuizQuestion = {
+  question: string
+  options: Record<string, string>
+  correctAnswer: string
+  order: number
+}
 
 export default function StudyNew() {
   const { user } = useAuth()
+  const { t, language } = useLanguage()
   const navigate = useNavigate()
+  const { request, cancel, loading, error, debugInfo, showDebug, setShowDebug, isSlow } = useAI()
   const [step, setStep] = useState<'form' | 'quiz' | 'result'>('form')
   const [subject, setSubject] = useState('')
   const [topic, setTopic] = useState('')
-  const [hours, setHours] = useState(1)
+  const [hours, setHours] = useState<number | ''>('')
   const [questions, setQuestions] = useState<QuizQuestion[]>([])
   const [answers, setAnswers] = useState<Record<number, string>>({})
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const [result, setResult] = useState<{ passed: boolean; correctCount: number; feedback: { index: number; correct: boolean; correctAnswer: string }[] } | null>(null)
 
   const handleGenerateQuestions = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-    setLoading(true)
     try {
-      const res = await callGemini('generate_questions', { subject, topic, hours })
-      if (!res.ok) throw new Error('Soru üretilemedi')
-      const data = await res.json()
-      setQuestions(data.questions ?? [])
+      const data = await request('generate_questions', { subject, topic, hours })
+      if (!data?.questions || data.questions.length === 0) throw new Error('AI soru üretemedi, tekrar deneyin.')
+
+      setQuestions(data.questions)
       setAnswers({})
       setStep('quiz')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Bir hata oluştu')
-    } finally {
-      setLoading(false)
+    } catch (err: any) {
+      console.error(err)
     }
   }
 
   const handleSubmitQuiz = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-    setLoading(true)
     try {
-      const res = await callGemini('evaluate_answers', {
-        questions: questions.map((q) => ({ question: q.question, correctAnswer: q.correctAnswer })),
-        answers: questions.map((_, i) => answers[i] ?? ''),
+      // Local check for multiple choice
+      let correctCount = 0
+      const feedback = questions.map((q, i) => {
+        const userAnswer = answers[i]
+        const isCorrect = userAnswer === q.correctAnswer
+        if (isCorrect) correctCount++
+        return {
+          index: i,
+          correct: isCorrect,
+          correctAnswer: q.correctAnswer // Stores 'A', 'B' etc.
+        }
       })
-      if (!res.ok) throw new Error('Değerlendirme yapılamadı')
-      const data = await res.json()
-      const correctCount = data.correctCount ?? 0
-      const feedback = data.feedback ?? []
-      const passed = correctCount >= 3
+
+      const passed = correctCount >= 3 // 3 or 4 correct to pass
       setResult({ passed, correctCount, feedback })
 
       if (user?.id) {
@@ -67,167 +78,246 @@ export default function StudyNew() {
           })
           .select('id')
           .single()
+
         if (sessionErr) {
-          setError('Çalışma kaydedilemedi: ' + (sessionErr.message || 'Bilinmeyen hata'))
+          console.error('Session save error:', sessionErr)
         } else if (sessionData?.id) {
           const { error: questionsErr } = await supabase.from('session_questions').insert(
             questions.map((q, i) => ({
               study_session_id: sessionData.id,
               question_text: q.question,
-              user_answer: (answers[i] ?? '').trim(),
-              is_correct: feedback[i]?.correct ?? false,
+              user_answer: answers[i] ?? '',
+              is_correct: feedback[i].correct,
               order_index: i,
             }))
           )
-          if (questionsErr) setError('Sorular kaydedilemedi: ' + (questionsErr.message || ''))
+
+          if (questionsErr) console.error('Questions save error:', questionsErr)
           else if (passed) {
-            const points = 10 + Math.min(hours * 2, 20)
+            const points = 10 + Math.min(Number(hours) * 2, 20)
             await supabase.rpc('increment_user_points', { p_user_id: user.id, p_points: points })
           }
         }
       }
       setStep('result')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Bir hata oluştu')
-    } finally {
-      setLoading(false)
+    } catch (err: any) {
+      console.error(err)
     }
   }
 
   if (step === 'quiz' && questions.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Çalışma Ekle</h1>
-        <div className="text-[rgb(var(--muted))]">Soru üretiliyor...</div>
+      <div className="max-w-2xl mx-auto flex flex-col items-center justify-center py-20 space-y-6">
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-xl font-bold animate-pulse">{t('study.generating')}</p>
       </div>
     )
   }
 
   if (step === 'result' && result) {
     return (
-      <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold">Sonuç</h1>
+      <div className="max-w-2xl mx-auto space-y-6 animate-in zoom-in relative">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">{t('study.result_title')}</h1>
+          <button
+            onClick={() => setShowDebug(!showDebug)}
+            className="text-[10px] opacity-20 hover:opacity-100"
+          >
+            DEBUG
+          </button>
+        </div>
         {result.passed ? (
-          <div className="rounded-xl border border-green-500/50 bg-green-500/10 p-4 text-green-700 dark:text-green-400">
-            Tebrikler! 4 sorudan {result.correctCount} doğru. Çalışman kaydedildi.
+          <div className="rounded-xl border border-green-500/50 bg-green-500/10 p-4 text-green-700 dark:text-green-400 font-medium">
+            {t('study.result_pass').replace('{count}', result.correctCount.toString())}
           </div>
         ) : (
-          <div className="rounded-xl border border-amber-500/50 bg-amber-500/10 p-4 text-amber-700 dark:text-amber-400">
-            Daha çok çalış. 4 sorudan {result.correctCount} doğru yaptın. En az 3 doğru gerekli; çalışma kaydedilmedi.
+          <div className="rounded-xl border border-amber-500/50 bg-amber-500/10 p-4 text-amber-700 dark:text-amber-400 font-medium">
+            {t('study.result_fail').replace('{count}', result.correctCount.toString())}
           </div>
         )}
-        <div>
-          <h2 className="font-semibold mb-2">Yanlışların ve doğru cevaplar</h2>
-          <ul className="space-y-3">
-            {result.feedback.filter((f) => !f.correct).map((f, i) => (
-              <li key={i} className="rounded-lg border border-[rgb(var(--border))] p-3 text-sm">
-                <p className="font-medium mb-1">Soru: {questions[f.index]?.question}</p>
-                <p className="text-red-600">Senin cevabın: {answers[f.index] || '(boş)'}</p>
-                <p className="text-green-600">Doğru cevap: {f.correctAnswer}</p>
-              </li>
-            ))}
-          </ul>
+        <div className="space-y-4">
+          <h2 className="font-semibold">{t('study.answer_key')}</h2>
+          {questions.map((q, i) => {
+            const f = result.feedback[i]
+            const isCorrect = f?.correct
+            const userAnswer = answers[i]
+            const opts = q.options || {}
+
+            return (
+              <div key={i} className={`rounded-xl border p-4 shadow-sm transition-all ${isCorrect ? 'border-green-500/30 bg-green-50/5' : 'border-red-500/30 bg-red-50/5'}`}>
+                <p className="font-medium mb-2">{i + 1}. {q.question}</p>
+                <div className="text-sm space-y-1">
+                  <p className={isCorrect ? 'text-green-600' : 'text-red-600'}>
+                    {t('study.your_answer')}: <strong>{userAnswer || '-'}</strong> {userAnswer && opts[userAnswer] ? `(${opts[userAnswer]})` : ''}
+                  </p>
+                  {!isCorrect && (
+                    <p className="text-green-600">
+                      {t('study.correct_answer')}: <strong>{q.correctAnswer}</strong> ({opts[q.correctAnswer]})
+                    </p>
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
-        <div className="flex gap-3">
+
+        <div className="flex gap-3 pt-6">
           <button
             type="button"
             onClick={() => { setStep('form'); setResult(null); setQuestions([]); }}
-            className="px-4 py-2 rounded-lg bg-[rgb(var(--accent))] text-white"
+            className="flex-1 px-4 py-3 rounded-xl bg-[rgb(var(--accent))] text-white font-bold shadow-lg hover:brightness-110 transition-all"
           >
-            Yeni çalışma ekle
+            {t('study.new')}
           </button>
           <button
             type="button"
             onClick={() => navigate('/dashboard')}
-            className="px-4 py-2 rounded-lg border border-[rgb(var(--border))]"
+            className="flex-1 px-4 py-3 rounded-xl border border-[rgb(var(--border))] font-bold hover:bg-accent/5 transition-all"
           >
-            Ana sayfaya dön
+            {t('study.back')}
           </button>
         </div>
+        {showDebug && <AIDebugPanel debugInfo={debugInfo} onClose={() => setShowDebug(false)} />}
       </div>
     )
   }
 
   if (step === 'quiz') {
     return (
-      <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold">Sorular – {subject}: {topic}</h1>
-        {error && <div className="text-red-500 text-sm p-2 rounded bg-red-500/10">{error}</div>}
-        <form onSubmit={handleSubmitQuiz} className="space-y-6">
-          {questions.map((q, i) => (
-            <div key={i} className="rounded-xl border border-[rgb(var(--border))] p-4">
-              <p className="font-medium mb-2">{i + 1}. {q.question}</p>
-              <input
-                type="text"
-                value={answers[i] ?? ''}
-                onChange={(e) => setAnswers((prev) => ({ ...prev, [i]: e.target.value }))}
-                className="w-full rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-3 py-2"
-                placeholder="Cevabını yaz"
-              />
-            </div>
-          ))}
+      <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in relative">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">{t('study.quiz_title')}</h1>
+          <button
+            onClick={() => setShowDebug(!showDebug)}
+            className="text-[10px] opacity-20 hover:opacity-100"
+          >
+            DEBUG
+          </button>
+        </div>
+        <p className="text-muted-foreground font-medium">{subject}: {topic}</p>
+        <form onSubmit={handleSubmitQuiz} className="space-y-8">
+          {questions.map((q, i) => {
+            const opts = q.options || {}
+            return (
+              <div key={i} className="rounded-2xl border border-[rgb(var(--border))] p-6 bg-[rgb(var(--card))] shadow-sm space-y-4">
+                <p className="font-bold text-lg leading-relaxed">{i + 1}. {q.question}</p>
+                <div className="grid gap-3">
+                  {Object.entries(opts).map(([key, val]) => {
+                    const isSelected = answers[i] === key
+                    return (
+                      <div
+                        key={key}
+                        onClick={() => setAnswers(prev => ({ ...prev, [i]: key }))}
+                        className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${isSelected
+                          ? 'border-[rgb(var(--accent))] bg-[rgb(var(--accent))]/5'
+                          : 'border-[rgb(var(--border))] hover:border-[rgb(var(--accent))]/30 hover:bg-accent/5'
+                          }`}
+                      >
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm border-2 transition-all ${isSelected ? 'bg-[rgb(var(--accent))] text-white border-[rgb(var(--accent))] shadow-lg' : 'bg-transparent text-[rgb(var(--muted))] border-[rgb(var(--border))]'
+                          }`}>
+                          {key}
+                        </div>
+                        <span className="text-base font-medium">{val}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
           <button
             type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-lg bg-[rgb(var(--accent))] text-white font-medium disabled:opacity-50"
+            className="w-full py-4 rounded-2xl bg-[rgb(var(--accent))] text-white text-xl font-black shadow-xl hover:brightness-110 active:scale-[0.98] transition-all btn-bounce"
           >
-            {loading ? 'Gönderiliyor...' : 'Cevapları gönder'}
+            {t('study.quiz_submit')}
           </button>
         </form>
+        {showDebug && <AIDebugPanel debugInfo={debugInfo} onClose={() => setShowDebug(false)} />}
       </div>
     )
   }
 
   return (
-    <div className="max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Çalışma Ekle</h1>
-      <p className="text-[rgb(var(--muted))] mb-6">Ders, konu ve süreyi gir. AI 4 soru üretecek; 3 veya 4 doğru yaparsan çalışman kaydedilir.</p>
-      <form onSubmit={handleGenerateQuestions} className="space-y-4">
-        {error && <div className="text-red-500 text-sm p-2 rounded bg-red-500/10">{error}</div>}
-        <div>
-          <label className="block text-sm font-medium mb-1">Ders</label>
+    <div className="max-w-xl mx-auto animate-in fade-in zoom-in-90 duration-700 relative">
+      <div className="flex justify-between items-start mb-4">
+        <h1 className="text-2xl font-bold">{t('study.title')}</h1>
+        <button
+          onClick={() => setShowDebug(!showDebug)}
+          className="text-[10px] opacity-20 hover:opacity-100"
+        >
+          DEBUG
+        </button>
+      </div>
+      <p className="text-[rgb(var(--muted))] mb-6">{t('study.desc')}</p>
+      <form onSubmit={handleGenerateQuestions} className="space-y-6">
+        {error && <div className="text-red-500 text-sm p-3 rounded-lg bg-red-500/10 border border-red-500/20 font-medium">{error}</div>}
+        <div className="space-y-2">
+          <label className="block text-sm font-bold ml-1">{t('study.subject')}</label>
           <select
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-3 py-2"
+            className="w-full rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-4 py-3 focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-sm"
             required
           >
-            <option value="">Seç</option>
+            <option value="">{t('common.select') || 'Seç'}</option>
             {SUBJECTS.map((s) => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s} value={s}>{language === 'English' ? (SUBJECT_MAP_EN[s] || s) : s}</option>
             ))}
           </select>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Konu</label>
+        <div className="space-y-2">
+          <label className="block text-sm font-bold ml-1">{t('study.topic')}</label>
           <input
             type="text"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            className="w-full rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-3 py-2"
+            className="w-full rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-4 py-3 focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-sm"
             placeholder="Örn: Faktöriyel"
             required
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Kaç saat çalıştın?</label>
+        <div className="space-y-2">
+          <label className="block text-sm font-bold ml-1">{t('study.hours')}</label>
           <input
             type="number"
             min={1}
             max={24}
             value={hours}
-            onChange={(e) => setHours(Number(e.target.value))}
-            className="w-full rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-3 py-2"
+            onChange={(e) => setHours(e.target.value === '' ? '' : Number(e.target.value))}
+            className="w-full rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-4 py-3 focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-sm"
+            onFocus={(e) => e.target.select()}
+            placeholder="Süre (saat)..."
+            required
           />
         </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3 rounded-lg bg-[rgb(var(--accent))] text-white font-medium disabled:opacity-50"
-        >
-          {loading ? 'Sorular üretiliyor...' : 'Soruları üret'}
-        </button>
+        <div className="space-y-4 pt-4">
+          <button
+            type="submit"
+            disabled={loading || !hours}
+            className="w-full py-4 rounded-2xl bg-[rgb(var(--accent))] text-white text-xl font-black shadow-xl disabled:opacity-50 btn-bounce relative overflow-hidden"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></span>
+                {t('study.generating')}
+              </span>
+            ) : t('study.generate')}
+          </button>
+          {loading && (
+            <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-2">
+              {isSlow && <p className="text-sm text-yellow-600 font-medium animate-bounce">Sorular hazıllanıyor, az kaldı...</p>}
+              <button
+                type="button"
+                onClick={cancel}
+                className="text-xs text-muted-foreground hover:text-red-500 underline"
+              >
+                İsteği İptal Et
+              </button>
+            </div>
+          )}
+        </div>
       </form>
+      {showDebug && <AIDebugPanel debugInfo={debugInfo} onClose={() => setShowDebug(false)} />}
     </div>
   )
 }

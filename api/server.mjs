@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY
 const genAI = GEMINI_KEY ? new GoogleGenerativeAI(GEMINI_KEY) : null
-const MODEL_NAME = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
+const MODEL_NAME = process.env.GEMINI_MODEL || 'gemini-1.5-flash'
 
 const PORT = process.env.PORT || 3001
 
@@ -28,26 +28,27 @@ function send(res, status, data) {
 }
 
 async function handleGenerateQuestions(model, { subject, topic, hours }) {
-  const prompt = `Sen bir eğitim asistanısın. Şu ders ve konu için ${hours} saat çalışma süresine göre zorluk ayarla: 1 saat daha kolay, 4+ saat daha zor olsun.
-Ders: ${subject}
-Konu: ${topic}
-Süre: ${hours} saat
-
-Tam 4 soru üret (kolaydan zora). Her biri için "question" ve "correctAnswer" alanları olan bir JSON dizisi döndür. Sadece JSON döndür, başka metin yazma. Format:
-[{"question":"Soru metni?", "correctAnswer":"Doğru cevap metni"}, ...]`
+  const prompt = `Ders: ${subject}, Konu: ${topic}, Süre: ${hours} saat. 
+HIZLI ve KISA (maks 15 kelime/soru) 4 adet çoktan seçmeli soru hazırla.
+Şıklar tek kelime/kısa olsun.
+JSON döndür:
+[{"question":"...","options":{"A":"...","B":"...","C":"...","D":"...","E":"..."},"correctAnswer":"A"}]`
 
   const result = await model.generateContent(prompt)
   const text = result.response?.text?.() || '[]'
   let questions = []
   try {
-    const parsed = JSON.parse(text.replace(/```json?\s*|\s*```/g, '').trim())
+    const jsonStr = text.replace(/```json?\s*|\s*```/g, '').trim()
+    const parsed = JSON.parse(jsonStr)
     questions = Array.isArray(parsed) ? parsed.slice(0, 4) : []
     questions = questions.map((q, i) => ({
-      question: q.question || q.soru || '',
-      correctAnswer: q.correctAnswer || q.dogruCevap || q.cevap || '',
+      question: q.question || '',
+      options: q.options || {},
+      correctAnswer: q.correctAnswer || 'A',
       order: i,
     }))
-  } catch (_) {
+  } catch (e) {
+    console.error('Parse error:', e)
     questions = []
   }
   return { questions }
@@ -105,6 +106,73 @@ Müfredat/konular: ${curriculum}`
   return { prediction }
 }
 
+async function handleGenerateTrueFalse(model, { subject, topic, grade, term }) {
+  const eff_subject = subject === 'Diğer' ? topic : subject;
+  const eff_topic = subject === 'Diğer' ? 'Genel' : (topic || 'Genel');
+  const ctx = `${grade || ''} ${term || ''}`.trim();
+  const prompt = `${ctx} seviyesindeki ${eff_subject} dersinin ${eff_topic} konusu için 5 adet PROFESYONEL ZORLUKTA Doğru/Yanlış sorusu hazırla.
+Kurallar:
+1. HIZLI yanıt, kısa soru.
+2. Sorular maks 12 kelime.
+3. SADECE JSON döndür:
+[{"question":"...","answer":true,"explanation":"..."},...]`
+
+  const result = await model.generateContent(prompt)
+  const text = result.response?.text?.() || '[]'
+  try {
+    const jsonStr = text.replace(/```json?\s*|\s*```/g, '').trim()
+    const parsed = JSON.parse(jsonStr)
+    return { questions: Array.isArray(parsed) ? parsed.slice(0, 5) : [] }
+  } catch (e) {
+    console.error('Parse error:', e)
+    return { questions: [] }
+  }
+}
+
+async function handleGenerateExamRehearsal(model, { subject, grade, term }) {
+  const ctx = `${grade || ''} ${term || ''}`.trim();
+  const prompt = `${ctx} seviyesindeki ${subject} dersi için ELİT SEVİYE bir sınav provası (rehearsal) hazırla.
+Kurallar:
+1. HIZLI ve net.
+2. Sorular kısa (maks 15 kelime).
+3. 5 MC, 5 TF, 3 Open-ended.
+4. SADECE JSON döndür:
+{"multiple_choice":[{"question":"...","options":{"A":"...","B":"...","C":"...","D":"...","E":"..."},"correctAnswer":"A"}],"true_false":[{"question":"...","answer":true}],"open_ended":[{"question":"...","sampleAnswer":"..."}]}`
+
+  const result = await model.generateContent(prompt)
+  const text = result.response?.text?.() || '{}'
+  try {
+    const jsonStr = text.replace(/```json?\s*|\s*```/g, '').trim()
+    return JSON.parse(jsonStr)
+  } catch (e) {
+    console.error('Parse error:', e)
+    return { multiple_choice: [], true_false: [], open_ended: [] }
+  }
+}
+
+async function handleEvaluateOpenAnswers(model, { questions, answers, language }) {
+  const lang = language === 'English' ? 'İngilizce' : 'Türkçe';
+  const questionsAndAnswers = (questions || []).map((q, i) => {
+    return `Soru ${i + 1}: ${q.question}\nÖrnek Cevap: ${q.sampleAnswer}\nÖğrenci Cevabı: ${answers[i] || '(Boş bırakıldı)'}`;
+  }).join('\n\n');
+  const prompt = `Sen bir öğretmensin. Öğrencinin açık uçlu sorulara verdiği cevapları ${lang} olarak değerlendir.
+${questionsAndAnswers}
+
+SADECE aşağıdaki JSON dizisini döndür:
+[{"score":0-10,"feedback":"...","correct":true/false},...]`;
+
+  const result = await model.generateContent(prompt)
+  const text = result.response?.text?.() || '[]'
+  try {
+    const jsonStr = text.replace(/```json?\s*|\s*```/g, '').trim()
+    const parsed = JSON.parse(jsonStr)
+    return { evaluations: Array.isArray(parsed) ? parsed.slice(0, 10) : [] }
+  } catch (e) {
+    console.error('Parse error:', e)
+    return { evaluations: [] }
+  }
+}
+
 async function handleChat(model, { history, message }) {
   const chat = model.startChat({
     history: (history || []).map((m) => ({
@@ -119,7 +187,10 @@ async function handleChat(model, { history, message }) {
 
 const handlers = {
   generate_questions: handleGenerateQuestions,
+  generate_true_false: handleGenerateTrueFalse,
+  generate_exam_rehearsal: handleGenerateExamRehearsal,
   evaluate_answers: handleEvaluateAnswers,
+  evaluate_open_answers: handleEvaluateOpenAnswers,
   exam_analysis: handleExamAnalysis,
   exam_prediction: handleExamPrediction,
   chat: handleChat,
@@ -137,6 +208,11 @@ const server = http.createServer(async (req, res) => {
   }
 
   try {
+    const authHeader = req.headers['authorization']
+    if (!authHeader) {
+      console.warn('[WARN] No authorization header found in local server request')
+    }
+
     const body = await parseBody(req)
     const action = body.action
     const handler = handlers[action]
