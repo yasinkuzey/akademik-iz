@@ -49,7 +49,7 @@ export default function Register() {
       {/* Dark Mode Toggle */}
       <button
         onClick={toggle}
-        className="absolute top-6 right-6 p-3 rounded-full bg-card border border-border/50 text-foreground hover:bg-muted/20 transition-all shadow-sm z-50 group hover:scale-110"
+        className="absolute top-6 right-6 p-3 rounded-full bg-[rgb(var(--secondary))] text-[rgb(var(--secondary-fg))] shadow-md hover:brightness-95 transition-all z-50 group hover:scale-110"
         title={!dark ? t('nav.dark_mode') || 'Karanlık Mod' : t('nav.light_mode') || 'Aydınlık Mod'}
       >
         {!dark ? (
@@ -126,7 +126,7 @@ export default function Register() {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full py-3.5 rounded-xl border border-border/50 bg-primary/5 text-foreground font-bold shadow-sm hover:bg-primary/10 hover:border-primary/20 transition-all flex items-center justify-center gap-3 group"
+              className="w-full py-3.5 rounded-xl bg-[rgb(var(--secondary))] text-[rgb(var(--secondary-fg))] font-bold shadow-md hover:brightness-95 hover:shadow-lg transition-all flex items-center justify-center gap-3 group"
             >
               <svg viewBox="0 0 24 24" className="w-5 h-5 group-hover:scale-110 transition-transform">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />

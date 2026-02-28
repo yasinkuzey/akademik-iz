@@ -120,7 +120,7 @@ export default function Settings() {
                             <button
                                 onClick={handleResetPassword}
                                 disabled={loading}
-                                className="w-full h-12 rounded-xl border border-border text-foreground font-black uppercase tracking-widest text-[10px] hover:bg-muted/50 transition-all"
+                                className="w-full h-12 rounded-xl bg-[rgb(var(--secondary))] text-[rgb(var(--secondary-fg))] font-black uppercase tracking-widest text-[10px] shadow-sm hover:brightness-95 transition-all"
                             >
                                 {t('settings.reset_password')}
                             </button>

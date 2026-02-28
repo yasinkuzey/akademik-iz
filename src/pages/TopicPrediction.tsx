@@ -68,7 +68,7 @@ export default function TopicPrediction() {
         <h1 className="text-2xl font-bold">{t('prediction.title')}</h1>
         <button
           onClick={() => setShowDebug(!showDebug)}
-          className="text-[10px] opacity-50 hover:opacity-100 bg-muted/10 px-3 py-1 rounded-full font-bold transition-all"
+          className="text-[10px] bg-[rgb(var(--secondary))] text-[rgb(var(--secondary-fg))] px-3 py-1 rounded-full font-bold shadow-sm hover:brightness-95 transition-all"
         >
           DEBUG
         </button>
@@ -119,7 +119,7 @@ export default function TopicPrediction() {
               <button
                 type="button"
                 onClick={cancel}
-                className="text-xs text-muted-foreground hover:text-red-500 bg-muted/10 px-4 py-1.5 rounded-full font-medium transition-colors"
+                className="text-xs bg-[rgb(var(--secondary))] text-[rgb(var(--secondary-fg))] px-4 py-1.5 rounded-full font-medium shadow-sm hover:brightness-95 transition-all"
               >
                 İşlemi İptal Et
               </button>

@@ -17,7 +17,7 @@ export default function Games() {
                 {activeGame !== 'menu' && (
                     <button
                         onClick={() => setActiveGame('menu')}
-                        className="text-sm font-medium text-foreground bg-muted/10 px-4 py-2 rounded-xl hover:bg-muted/20 transition-colors"
+                        className="text-sm font-bold bg-[rgb(var(--secondary))] text-[rgb(var(--secondary-fg))] px-4 py-2 rounded-xl shadow-md hover:brightness-95 transition-all"
                     >
                         {t('games.back')}
                     </button>

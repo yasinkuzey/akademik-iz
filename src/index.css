@@ -25,6 +25,10 @@
   --accent: 33 90 243;
   --accent-fg: 255 255 255;
 
+  /* High Contrast Solid Secondary (Slate 200 - Solid Gray/Blue) */
+  --secondary: 226 232 240;
+  --secondary-fg: 15 23 42;
+
   /* Status Colors */
   --success: 34 197 94;
   --warning: 245 158 11;
@@ -51,6 +55,10 @@
   /* Blue 400 */
   --accent: 96 165 250;
   --accent-fg: 15 23 42;
+
+  /* High Contrast Solid Secondary (Slate 800 - Solid Navy/Anthracite) */
+  --secondary: 30 41 59;
+  --secondary-fg: 248 250 252;
 }
 
 body {
