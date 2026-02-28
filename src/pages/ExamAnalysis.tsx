@@ -1,0 +1,198 @@
+import { useState, useEffect } from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import { supabase } from '@/lib/supabase'
+import { callGemini } from '@/lib/api'
+
+const EXAM_TYPES = [
+  { value: 'tyt', label: 'TYT' },
+  { value: 'ayt', label: 'AYT' },
+  { value: 'middle_school', label: 'Ortaokul (LGS)' },
+]
+
+const SUBJECTS_BY_EXAM: Record<string, string[]> = {
+  tyt: ['Türkçe', 'Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü'],
+  ayt: ['Matematik', 'Edebiyat', 'Fizik', 'Kimya', 'Biyoloji', 'Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü'],
+  middle_school: ['Türkçe', 'Matematik', 'Fen Bilimleri', 'Sosyal Bilgiler', 'İnkılap Tarihi', 'Din Kültürü', 'İngilizce'],
+}
+
+type SubjectScores = Record<string, { dogru: number; yanlis: number; bos: number }>
+
+function emptyScores(subjects: string[]): SubjectScores {
+  const o: SubjectScores = {}
+  subjects.forEach((s) => { o[s] = { dogru: 0, yanlis: 0, bos: 0 } })
+  return o
+}
+
+export default function ExamAnalysis() {
+  const { user } = useAuth()
+  const [examType, setExamType] = useState('tyt')
+  const [scores, setScores] = useState<SubjectScores>(() => emptyScores(SUBJECTS_BY_EXAM.tyt))
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [analysis, setAnalysis] = useState('')
+  const [history, setHistory] = useState<{ id: string; exam_type: string; analysis_text: string; created_at: string }[]>([])
+  const [loadingHistory, setLoadingHistory] = useState(true)
+
+  const subjects = SUBJECTS_BY_EXAM[examType] ?? SUBJECTS_BY_EXAM.tyt
+
+  useEffect(() => {
+    setScores(emptyScores(subjects))
+  }, [examType])
+
+  const loadHistory = async () => {
+    if (!user?.id) return
+    const { data } = await supabase
+      .from('exam_analyses')
+      .select('id, exam_type, analysis_text, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(10)
+    setHistory((data as typeof history) ?? [])
+    setLoadingHistory(false)
+  }
+
+  useEffect(() => {
+    loadHistory()
+  }, [user?.id])
+
+  const setSubjectScore = (subject: string, field: 'dogru' | 'yanlis' | 'bos', value: number) => {
+    setScores((prev) => ({
+      ...prev,
+      [subject]: { ...prev[subject], [field]: Math.max(0, value) },
+    }))
+  }
+
+  const buildInputData = (): string => {
+    return subjects
+      .map((s) => {
+        const v = scores[s] ?? { dogru: 0, yanlis: 0, bos: 0 }
+        return `${s}: ${v.dogru} doğru, ${v.yanlis} yanlış, ${v.bos} boş`
+      })
+      .join('\n')
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setAnalysis('')
+    setLoading(true)
+    const inputData = buildInputData()
+    try {
+      const res = await callGemini('exam_analysis', {
+        examType,
+        inputData,
+      })
+      if (!res.ok) throw new Error('Analiz yapılamadı')
+      const data = await res.json()
+      const text = data.analysis ?? data.text ?? ''
+      setAnalysis(text)
+      if (user?.id && text) {
+        await supabase.from('exam_analyses').insert({
+          user_id: user.id,
+          exam_type: examType,
+          input_data: { scores, raw: inputData },
+          analysis_text: text,
+        })
+        loadHistory()
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bir hata oluştu')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-8">
+      <h1 className="text-2xl font-bold">Deneme Analizi</h1>
+      <p className="text-[rgb(var(--muted))]">Sınav türünü seç, her ders için doğru / yanlış / boş sayılarını gir. AI eksiklerini ve ne yapman gerektiğini analiz edecek.</p>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Sınav türü</label>
+          <select
+            value={examType}
+            onChange={(e) => setExamType(e.target.value)}
+            className="w-full rounded-lg border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-3 py-2"
+          >
+            {EXAM_TYPES.map((t) => (
+              <option key={t.value} value={t.value}>{t.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--card))] overflow-hidden">
+          <div className="bg-[rgb(var(--bg))] px-4 py-2 border-b border-[rgb(var(--border))] text-sm font-medium grid grid-cols-4 gap-2">
+            <span>Ders</span>
+            <span className="text-center">Doğru</span>
+            <span className="text-center">Yanlış</span>
+            <span className="text-center">Boş</span>
+          </div>
+          {subjects.map((subject) => {
+            const v = scores[subject] ?? { dogru: 0, yanlis: 0, bos: 0 }
+            return (
+              <div key={subject} className="px-4 py-2 border-b border-[rgb(var(--border))] last:border-0 grid grid-cols-4 gap-2 items-center">
+                <span className="text-sm font-medium">{subject}</span>
+                <input
+                  type="number"
+                  min={0}
+                  value={v.dogru}
+                  onChange={(e) => setSubjectScore(subject, 'dogru', parseInt(e.target.value, 10) || 0)}
+                  className="rounded border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-2 py-1 text-sm text-center w-16 justify-self-center"
+                />
+                <input
+                  type="number"
+                  min={0}
+                  value={v.yanlis}
+                  onChange={(e) => setSubjectScore(subject, 'yanlis', parseInt(e.target.value, 10) || 0)}
+                  className="rounded border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-2 py-1 text-sm text-center w-16 justify-self-center"
+                />
+                <input
+                  type="number"
+                  min={0}
+                  value={v.bos}
+                  onChange={(e) => setSubjectScore(subject, 'bos', parseInt(e.target.value, 10) || 0)}
+                  className="rounded border border-[rgb(var(--border))] bg-[rgb(var(--bg))] px-2 py-1 text-sm text-center w-16 justify-self-center"
+                />
+              </div>
+            )
+          })}
+        </div>
+
+        {error && <div className="text-red-500 text-sm p-2 rounded bg-red-500/10">{error}</div>}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-3 rounded-lg bg-[rgb(var(--accent))] text-white font-medium disabled:opacity-50"
+        >
+          {loading ? 'Analiz ediliyor...' : 'Analiz et'}
+        </button>
+      </form>
+
+      {analysis && (
+        <div className="rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--card))] p-6">
+          <h2 className="font-semibold mb-2">Analiz sonucu</h2>
+          <div className="whitespace-pre-wrap text-sm">{analysis}</div>
+        </div>
+      )}
+
+      <div>
+        <h2 className="text-lg font-semibold mb-2">Geçmiş analizler</h2>
+        {loadingHistory ? (
+          <div className="text-[rgb(var(--muted))]">Yükleniyor...</div>
+        ) : history.length === 0 ? (
+          <div className="text-[rgb(var(--muted))]">Henüz analiz yok.</div>
+        ) : (
+          <ul className="space-y-3">
+            {history.map((h) => (
+              <li key={h.id} className="rounded-lg border border-[rgb(var(--border))] p-3">
+                <span className="text-xs text-[rgb(var(--muted))]">{EXAM_TYPES.find((t) => t.value === h.exam_type)?.label ?? h.exam_type} – {new Date(h.created_at).toLocaleString('tr-TR')}</span>
+                <p className="mt-1 text-sm line-clamp-2">{h.analysis_text}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  )
+}

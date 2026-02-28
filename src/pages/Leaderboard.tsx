@@ -1,0 +1,58 @@
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+
+type Row = { display_name: string | null; total_points: number; rank?: number }
+
+export default function Leaderboard() {
+  const [rows, setRows] = useState<Row[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('display_name, total_points')
+        .order('total_points', { ascending: false })
+        .limit(50)
+      const list = (data ?? []).map((r, i) => ({ ...r, rank: i + 1 })) as Row[]
+      setRows(list)
+      setLoading(false)
+    }
+    fetchLeaderboard()
+  }, [])
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-6">
+      <h1 className="text-2xl font-bold">Liderlik tablosu</h1>
+      <p className="text-[rgb(var(--muted))]">Her başarıyla eklenen çalışmada puan kazanırsın. Süreye göre ek puan verilir.</p>
+
+      {loading ? (
+        <div className="text-[rgb(var(--muted))]">Yükleniyor...</div>
+      ) : (
+        <div className="rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--card))] overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[rgb(var(--border))] bg-[rgb(var(--bg))]">
+                <th className="text-left p-3 w-12">#</th>
+                <th className="text-left p-3">Kullanıcı</th>
+                <th className="text-right p-3">Puan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r, i) => (
+                <tr key={i} className="border-b border-[rgb(var(--border))]">
+                  <td className="p-3 font-medium">{r.rank ?? i + 1}</td>
+                  <td className="p-3">{r.display_name || 'Anonim'}</td>
+                  <td className="p-3 text-right">{r.total_points ?? 0}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {rows.length === 0 && (
+            <div className="p-8 text-center text-[rgb(var(--muted))]">Henüz puan yok.</div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
