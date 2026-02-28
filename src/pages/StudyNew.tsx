@@ -121,7 +121,7 @@ export default function StudyNew() {
           <h1 className="text-2xl font-bold">{t('study.result_title')}</h1>
           <button
             onClick={() => setShowDebug(!showDebug)}
-            className="text-[10px] opacity-20 hover:opacity-100"
+            className="text-[10px] opacity-50 hover:opacity-100 bg-muted/10 px-3 py-1 rounded-full font-bold transition-all"
           >
             DEBUG
           </button>
@@ -172,7 +172,7 @@ export default function StudyNew() {
           <button
             type="button"
             onClick={() => navigate('/dashboard')}
-            className="flex-1 px-4 py-3 rounded-xl border border-[rgb(var(--border))] font-bold hover:bg-accent/5 transition-all"
+            className="flex-1 px-4 py-3 rounded-xl bg-muted/20 border border-border/50 font-bold hover:bg-muted/30 transition-all text-foreground"
           >
             {t('study.back')}
           </button>
@@ -189,7 +189,7 @@ export default function StudyNew() {
           <h1 className="text-2xl font-bold">{t('study.quiz_title')}</h1>
           <button
             onClick={() => setShowDebug(!showDebug)}
-            className="text-[10px] opacity-20 hover:opacity-100"
+            className="text-[10px] opacity-50 hover:opacity-100 bg-muted/10 px-3 py-1 rounded-full font-bold transition-all"
           >
             DEBUG
           </button>
@@ -243,7 +243,7 @@ export default function StudyNew() {
         <h1 className="text-2xl font-bold">{t('study.title')}</h1>
         <button
           onClick={() => setShowDebug(!showDebug)}
-          className="text-[10px] opacity-20 hover:opacity-100"
+          className="text-[10px] opacity-50 hover:opacity-100 bg-muted/10 px-3 py-1 rounded-full font-bold transition-all"
         >
           DEBUG
         </button>
@@ -309,7 +309,7 @@ export default function StudyNew() {
               <button
                 type="button"
                 onClick={cancel}
-                className="text-xs text-muted-foreground hover:text-red-500 underline"
+                className="text-xs text-muted-foreground hover:text-red-500 bg-muted/10 px-4 py-1.5 rounded-full font-medium transition-colors"
               >
                 İsteği İptal Et
               </button>

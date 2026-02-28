@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLanguage } from '@/hooks/useLanguage'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { useTheme } from '@/hooks/useTheme'
 import logo from '@/assets/logo.png'
 
 export default function Login() {
@@ -12,6 +13,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const { t } = useLanguage()
   const navigate = useNavigate()
+  const { dark, toggle } = useTheme()
 
   const getLocalizedError = (message: string) => {
     if (message.includes('Invalid login credentials')) return t('auth.error_invalid_credentials')
@@ -75,8 +77,21 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-background">
-      <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-background relative selection:bg-primary/10 selection:text-primary">
+      {/* Dark Mode Toggle */}
+      <button
+        onClick={toggle}
+        className="absolute top-6 right-6 p-3 rounded-full bg-card border border-border/50 text-foreground hover:bg-muted/20 transition-all shadow-sm z-50 group hover:scale-110"
+        title={!dark ? t('nav.dark_mode') || 'Karanlık Mod' : t('nav.light_mode') || 'Aydınlık Mod'}
+      >
+        {!dark ? (
+          <span className="text-xl group-hover:rotate-12 transition-transform block">🌙</span>
+        ) : (
+          <span className="text-xl group-hover:-rotate-12 transition-transform block">☀️</span>
+        )}
+      </button>
+
+      <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
         <div className="text-center">
           <img src={logo} alt="Logo" className="w-16 h-16 mx-auto mb-4 object-contain" />
           <h2 className="text-3xl font-bold tracking-tight text-foreground">{t('auth.login_title')}</h2>
@@ -147,9 +162,9 @@ export default function Login() {
               type="button"
               onClick={handleGoogleLogin}
               disabled={googleLoading || loading}
-              className="w-full py-2.5 rounded-lg border border-border bg-background text-foreground font-semibold shadow-sm hover:bg-accent/5 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3.5 rounded-xl border border-border/50 bg-primary/5 text-foreground font-bold shadow-sm hover:bg-primary/10 hover:border-primary/20 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group"
             >
-              <svg viewBox="0 0 24 24" className="w-5 h-5">
+              <svg viewBox="0 0 24 24" className="w-5 h-5 group-hover:scale-110 transition-transform">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1.01.67-2.3 1.07-3.71 1.07-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />

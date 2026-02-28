@@ -69,7 +69,7 @@ export default function Tutor() {
         <h1 className="text-2xl font-bold">{t('tutor.title')}</h1>
         <button
           onClick={() => setShowDebug(!showDebug)}
-          className="text-[10px] opacity-20 hover:opacity-100"
+          className="text-[10px] opacity-50 hover:opacity-100 bg-muted/10 px-3 py-1 rounded-full font-bold transition-all"
         >
           DEBUG
         </button>
@@ -112,7 +112,7 @@ export default function Tutor() {
                 </p>
                 <button
                   onClick={cancel}
-                  className="text-[10px] text-muted-foreground hover:text-red-500 underline"
+                  className="text-[10px] text-muted-foreground hover:text-red-500 bg-muted/10 px-3 py-1.5 rounded-full font-medium transition-colors"
                 >
                   {language === 'Turkish' ? 'Yanıltmayı Durdur' : 'Stop Thinking'}
                 </button>

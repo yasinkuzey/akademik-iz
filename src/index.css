@@ -13,8 +13,8 @@
   --card: 255 255 255;
   /* Slate 500 */
   --muted: 100 116 139;
-  /* Slate 200 */
-  --border: 226 232 240;
+  /* Slate 200 -> Light Navy / Soft Blue (Blue 200) */
+  --border: 191 219 254;
 
   /* Brand Colors */
   /* Deep Navy (Slate 950 for more depth) */
@@ -40,8 +40,8 @@
   --card: 15 23 42;
   /* Slate 400 */
   --muted: 148 163 184;
-  /* Slate 800 */
-  --border: 30 41 59;
+  /* Slate 800 -> Navy Blue (Blue 900) */
+  --border: 30 58 138;
 
   /* Brand Colors */
   /* Blue 500 */
