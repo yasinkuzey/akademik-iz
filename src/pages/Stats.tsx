@@ -70,25 +70,41 @@ export default function Stats() {
         <p className="text-muted-foreground font-medium">{t('stats.desc') || 'Akademik ilerlemenin detaylı analizi.'}</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: t('dashboard.completed_study'), value: agg?.total_sessions ?? 0, icon: '📚' },
-          { label: t('dashboard.total_time'), value: `${agg?.total_hours ?? 0} ${t('dashboard.unit_hours')}`, icon: '⏱️' },
-          { label: t('dashboard.solved_test'), value: agg?.quiz_count ?? 0, icon: '📝' },
+          { label: t('dashboard.completed_study') || 'TAMAMLANAN ÇALIŞMA', value: agg?.total_sessions ?? 0, icon: '📚' },
+          { label: t('dashboard.total_time') || 'TOPLAM SÜRE', value: `${agg?.total_hours ?? 0} ${t('dashboard.unit_hours') || 'SAAT'}`, icon: '⏱️' },
+          { label: t('dashboard.solved_test') || 'ÇÖZÜLEN TEST', value: agg?.quiz_count ?? 0, icon: '📝' },
         ].map((item, i) => (
-          <div key={i} className="rounded-3xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-all">
-            <div className="text-2xl mb-2">{item.icon}</div>
-            <div className="text-2xl md:text-3xl font-black text-foreground">{item.value}</div>
-            <div className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-muted-foreground mt-1">{item.label}</div>
+          <div key={i} className="bg-card border border-border/50 rounded-[2.5rem] p-8 space-y-6 shadow-sm hover:shadow-md transition-all group">
+            <div className="flex items-center gap-4">
+              <span className="text-4xl group-hover:scale-110 transition-transform">{item.icon}</span>
+              <h3 className="font-black uppercase tracking-widest text-[10px] text-muted-foreground leading-tight">{item.label}</h3>
+            </div>
+            <div className="text-4xl md:text-5xl font-black italic text-foreground tracking-tighter">{item.value}</div>
           </div>
         ))}
-        <div className="rounded-3xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-all">
-          <div className="text-xl font-bold text-success flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-success"></span>
-            {agg?.total_correct ?? 0} {t('dashboard.correct_answer').split(' ')[0]}
+
+        <div className="bg-card border border-border/50 rounded-[2.5rem] p-8 space-y-6 shadow-sm hover:shadow-md transition-all group">
+          <div className="flex items-center gap-4">
+            <span className="text-4xl group-hover:-rotate-12 transition-transform">🎯</span>
+            <h3 className="font-black uppercase tracking-widest text-[10px] text-muted-foreground leading-tight">PERFORMANS</h3>
           </div>
-          <div className="text-sm text-destructive font-bold mt-1">{agg?.total_wrong ?? 0} {t('dashboard.wrong')}</div>
-          <div className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-muted-foreground mt-3">{t('dashboard.correct_answer')}</div>
+          <div className="space-y-2">
+            <div className="text-xl font-black italic text-success flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-success shadow-[0_0_10px_rgb(var(--success))] animate-pulse"></span>
+                {agg?.total_correct ?? 0} <span className="text-xs tracking-widest text-success/70 uppercase">DOĞRU</span>
+              </span>
+            </div>
+            <div className="w-full h-[1px] bg-border/50"></div>
+            <div className="text-xl font-black italic text-destructive flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-destructive shadow-[0_0_10px_rgb(var(--destructive))]"></span>
+                {agg?.total_wrong ?? 0} <span className="text-xs tracking-widest text-destructive/70 uppercase">YANLIŞ</span>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

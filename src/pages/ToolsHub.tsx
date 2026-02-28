@@ -12,6 +12,7 @@ export default function ToolsHub() {
                 { to: '/exam-analysis', label: t('nav.exam_analysis'), icon: '📝', desc: language === 'Turkish' ? 'Sınav sonuçlarını derinlemesine incele ve gelişimini takip et.' : 'Analyze exam results in depth and track your progress.' },
                 { to: '/exam-prediction', label: t('nav.exam_prediction'), icon: '🔭', desc: language === 'Turkish' ? 'Gelecek sınav sonuçlarını yapay zeka ile bilimsel olarak tahmin et.' : 'Scientifically predict future exam results using AI.' },
                 { to: '/exam-prep', label: t('nav.exam_prep'), icon: '📚', desc: language === 'Turkish' ? 'Sınav formatına göre özel çalışma setleri ile hazırlık yap.' : 'Prepare with custom study sets based on exam format.' },
+                { to: '/stats', label: t('nav.stats') || 'İstatistikler', icon: '📊', desc: language === 'Turkish' ? 'Çalışma verilerini ve karneni detaylı incele.' : 'Analyze your study data and report card in detail.' },
             ]
         },
         {

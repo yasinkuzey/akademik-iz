@@ -56,9 +56,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t border-border/50 h-16 flex items-center justify-around z-50">
                 {[
                     { to: '/dashboard', icon: '🏠' },
-                    { to: '/diagnostic', icon: '🔍' },
                     { to: '/learning-plan', icon: '🎯' },
-                    { to: '/tools', icon: '🛠️' }
+                    { to: '/leaderboard', icon: '🏆' },
+                    { to: '/tools', icon: '🛠️' },
+                    { to: '/settings', icon: '⚙️' }
                 ].map(item => (
                     <Link
                         key={item.to}

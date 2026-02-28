@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -6,6 +7,7 @@ import { useLanguage } from '@/hooks/useLanguage'
 export default function Settings() {
     const { user } = useAuth()
     const { t, language } = useLanguage()
+    const navigate = useNavigate()
 
     const [name, setName] = useState(user?.user_metadata?.display_name || '')
     const [loading, setLoading] = useState(false)
@@ -40,6 +42,12 @@ export default function Settings() {
             setMessage({ type: 'success', text: t('settings.reset_password_desc') })
         }
         setLoading(false)
+    }
+
+    const handleLogout = async () => {
+        setLoading(true)
+        await supabase.auth.signOut()
+        navigate('/')
     }
 
     return (
@@ -99,7 +107,7 @@ export default function Settings() {
                 <section className="bg-card border border-border/50 rounded-[3rem] p-10 space-y-8 shadow-sm">
                     <h2 className="text-xl font-black italic uppercase tracking-tighter flex items-center gap-3">
                         <span className="w-8 h-[2px] bg-destructive/20"></span>
-                        {language === 'Turkish' ? 'GÜVENLİK' : 'SECURITY'}
+                        {language === 'Turkish' ? 'GÜVENLİK VE HESAP' : 'SECURITY & ACCOUNT'}
                     </h2>
 
                     <div className="space-y-6">
@@ -112,9 +120,24 @@ export default function Settings() {
                             <button
                                 onClick={handleResetPassword}
                                 disabled={loading}
-                                className="w-full h-12 rounded-xl border border-destructive/20 text-destructive font-black uppercase tracking-widest text-[10px] hover:bg-destructive/5 transition-all"
+                                className="w-full h-12 rounded-xl border border-border text-foreground font-black uppercase tracking-widest text-[10px] hover:bg-muted/50 transition-all"
                             >
                                 {t('settings.reset_password')}
+                            </button>
+                        </div>
+
+                        <div className="p-6 rounded-[2rem] bg-destructive/5 border border-destructive/20 space-y-4">
+                            <p className="text-sm font-bold text-destructive/80 leading-relaxed">
+                                {language === 'Turkish'
+                                    ? 'Hesabından güvenli bir şekilde çıkış yapmak için aşağıdaki butonu kullan.'
+                                    : 'Use the button below to safely log out of your account.'}
+                            </p>
+                            <button
+                                onClick={handleLogout}
+                                disabled={loading}
+                                className="w-full h-14 rounded-2xl bg-destructive text-destructive-foreground font-black uppercase tracking-widest text-[10px] shadow-lg shadow-destructive/20 hover:scale-[1.02] active:scale-95 transition-all"
+                            >
+                                {t('nav.logout')}
                             </button>
                         </div>
                     </div>

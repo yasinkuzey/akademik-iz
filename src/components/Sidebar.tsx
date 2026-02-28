@@ -10,6 +10,7 @@ export default function Sidebar() {
         { to: '/dashboard', label: t('nav.dashboard'), icon: '🏠' },
         { to: '/learning-plan', label: t('nav.learning_plan') || 'Öğrenme Planı', icon: '🎯' },
         { to: '/tutor', label: t('nav.tutor_chat') || 'AI ile Konuş', icon: '🤖' },
+        { to: '/leaderboard', label: t('nav.leaderboard') || 'Liderlik Tablosu', icon: '🏆' },
         { to: '/tools', label: t('nav.tools') || 'Araçlar', icon: '🛠️' },
         { to: '/settings', label: t('nav.settings') || 'Ayarlar', icon: '⚙️' },
     ]
