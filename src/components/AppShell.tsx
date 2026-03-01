@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useTheme } from '@/hooks/useTheme'
+import logo from '@/assets/logo.png'
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
     const location = useLocation()
@@ -16,8 +17,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 {/* Topbar */}
                 <header className="h-16 flex items-center justify-between px-6 sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border/50">
                     <div className="flex items-center gap-4">
-                        {/* Mobile Menu Toggle could be here */}
-                        <h1 className="lg:hidden font-black italic tracking-tighter text-xl text-primary uppercase">{t('app.name')}</h1>
+                        <Link to="/dashboard" className="flex items-center gap-2">
+                            <img src={logo} alt="Logo" className="w-8 h-8 object-contain rounded-full bg-primary/5 p-0.5" />
+                            <span className="font-black italic tracking-tighter text-xl text-primary uppercase">{t('app.name')}</span>
+                        </Link>
                     </div>
 
                     <div className="flex items-center gap-4">

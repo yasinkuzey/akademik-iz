@@ -61,20 +61,21 @@ export default function Stats() {
     run()
   }, [user?.id])
 
-  if (loading) return <div className="animate-pulse text-[rgb(var(--muted))]">Yükleniyor...</div>
+
+  if (loading) return <div className="animate-pulse text-muted-foreground">{t('common.loading')}</div>
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
       <div className="space-y-2 text-center md:text-left">
-        <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter text-foreground uppercase">{t('nav.stats') || 'İstatistikler'}</h1>
-        <p className="text-muted-foreground font-medium">{t('stats.desc') || 'Akademik ilerlemenin detaylı analizi.'}</p>
+        <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter text-foreground uppercase">{t('nav.stats')}</h1>
+        <p className="text-muted-foreground font-medium">{t('stats.desc')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: t('dashboard.completed_study') || 'TAMAMLANAN ÇALIŞMA', value: agg?.total_sessions ?? 0, icon: '📚' },
-          { label: t('dashboard.total_time') || 'TOPLAM SÜRE', value: `${agg?.total_hours ?? 0} ${t('dashboard.unit_hours') || 'SAAT'}`, icon: '⏱️' },
-          { label: t('dashboard.solved_test') || 'ÇÖZÜLEN TEST', value: agg?.quiz_count ?? 0, icon: '📝' },
+          { label: t('dashboard.completed_study'), value: agg?.total_sessions ?? 0, icon: '📚' },
+          { label: t('dashboard.total_time'), value: `${agg?.total_hours ?? 0} ${t('dashboard.unit_hours')}`, icon: '⏱️' },
+          { label: t('dashboard.solved_test'), value: agg?.quiz_count ?? 0, icon: '📝' },
         ].map((item, i) => (
           <div key={i} className="bg-card border border-border/50 rounded-[2.5rem] p-8 space-y-6 shadow-sm hover:shadow-md transition-all group">
             <div className="flex items-center gap-4">
@@ -88,20 +89,20 @@ export default function Stats() {
         <div className="bg-card border border-border/50 rounded-[2.5rem] p-8 space-y-6 shadow-sm hover:shadow-md transition-all group">
           <div className="flex items-center gap-4">
             <span className="text-4xl group-hover:-rotate-12 transition-transform">🎯</span>
-            <h3 className="font-black uppercase tracking-widest text-[10px] text-muted-foreground leading-tight">PERFORMANS</h3>
+            <h3 className="font-black uppercase tracking-widest text-[10px] text-muted-foreground leading-tight">{t('stats.performance')}</h3>
           </div>
           <div className="space-y-2">
             <div className="text-xl font-black italic text-success flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-success shadow-[0_0_10px_rgb(var(--success))] animate-pulse"></span>
-                {agg?.total_correct ?? 0} <span className="text-xs tracking-widest text-success/70 uppercase">DOĞRU</span>
+                {agg?.total_correct ?? 0} <span className="text-xs tracking-widest text-success/70 uppercase">{t('stats.correct')}</span>
               </span>
             </div>
             <div className="w-full h-[1px] bg-border/50"></div>
             <div className="text-xl font-black italic text-destructive flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-destructive shadow-[0_0_10px_rgb(var(--destructive))]"></span>
-                {agg?.total_wrong ?? 0} <span className="text-xs tracking-widest text-destructive/70 uppercase">YANLIŞ</span>
+                {agg?.total_wrong ?? 0} <span className="text-xs tracking-widest text-destructive/70 uppercase">{t('stats.wrong')}</span>
               </span>
             </div>
           </div>
@@ -109,7 +110,7 @@ export default function Stats() {
       </div>
 
       <div className="space-y-6">
-        <h2 className="text-xl font-black italic tracking-tight text-foreground uppercase">{t('stats.subject_distribution') || 'Ders Dağılımı'}</h2>
+        <h2 className="text-xl font-black italic tracking-tight text-foreground uppercase">{t('stats.subject_distribution')}</h2>
         <div className="rounded-[2.5rem] border border-border bg-card shadow-xl overflow-hidden backdrop-blur-sm">
           <div className="overflow-x-auto">
             {bySubject.length === 0 ? (
@@ -120,7 +121,7 @@ export default function Stats() {
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border bg-muted/30">
+                  <tr className="border-b border-border bg-muted/10">
                     <th className="text-left p-6 text-xs font-black uppercase tracking-widest text-muted-foreground">{t('study.table_subject')}</th>
                     <th className="text-right p-6 text-xs font-black uppercase tracking-widest text-muted-foreground">{t('study.table_duration')}</th>
                   </tr>
@@ -137,8 +138,8 @@ export default function Stats() {
                         </div>
                       </td>
                       <td className="p-6 text-right">
-                        <div className="text-lg font-black text-primary">{s.hours} <span className="text-[10px] uppercase opacity-70">sa</span></div>
-                        <div className="text-[10px] font-bold text-muted-foreground uppercase">{s.count} {t('dashboard.completed_study').split(' ')[0]}</div>
+                        <div className="text-lg font-black text-primary">{s.hours} <span className="text-[10px] uppercase opacity-70">{t('study.unit_hours_short')}</span></div>
+                        <div className="text-[10px] font-bold text-muted-foreground uppercase">{s.count} {t('stats.sessions')}</div>
                       </td>
                     </tr>
                   ))}

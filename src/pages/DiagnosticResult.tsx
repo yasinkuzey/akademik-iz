@@ -59,12 +59,12 @@ export default function DiagnosticResult() {
             setAiFeedback(data.feedback)
         } catch (err) {
             console.error(err)
-            setAiFeedback('Geri bildirim şu an oluşturulamadı. Lütfen daha sonra tekrar dene.')
+            setAiFeedback(t('diagnostic.feedback_error'))
         }
         setIsAiLoading(false)
     }
 
-    if (loading) return <div className="p-20 text-center uppercase font-black animate-pulse">Sonuçlar Getiriliyor...</div>
+    if (loading) return <div className="p-20 text-center uppercase font-black animate-pulse">{t('common.loading')}</div>
 
     // Basic stats calculation
     const total = answers.length
@@ -86,12 +86,12 @@ export default function DiagnosticResult() {
             <div className="flex flex-col md:flex-row justify-between items-end gap-6 bg-card border border-border/50 rounded-[3rem] p-10 md:p-16 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-8 text-8xl opacity-10 font-black italic">%{score}</div>
                 <div className="space-y-4 relative z-10 w-full md:w-auto text-center md:text-left">
-                    <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter leading-none">ANALİZ RAPORUN</h1>
-                    <p className="text-muted-foreground font-bold text-lg uppercase">{session?.subject} • {session?.stage.toUpperCase()} SEVİYESİ</p>
+                    <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter leading-none">{t('diagnostic.result_title')}</h1>
+                    <p className="text-muted-foreground font-bold text-lg uppercase">{session?.subject} • {session?.stage.toUpperCase()} {t('diagnostic.level')}</p>
                 </div>
                 <div className="flex gap-4 w-full md:w-auto relative z-10">
-                    <button onClick={() => navigate('/diagnostic')} className="flex-1 px-8 py-4 rounded-2xl bg-muted font-black text-[10px] uppercase tracking-widest hover:bg-muted/80 transition-all">YENİ TEST</button>
-                    <button onClick={() => window.print()} className="flex-1 px-8 py-4 rounded-2xl bg-primary text-primary-foreground font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 transition-all">RAPORU İNDİR</button>
+                    <button onClick={() => navigate('/diagnostic')} className="flex-1 px-8 py-4 rounded-2xl bg-secondary text-secondary-foreground font-black text-[10px] uppercase tracking-widest hover:opacity-80 transition-all btn-glow">{t('diagnostic.new_test')}</button>
+                    <button onClick={() => window.print()} className="flex-1 px-8 py-4 rounded-2xl bg-primary text-primary-foreground font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 transition-all btn-glow">{t('diagnostic.download_report')}</button>
                 </div>
             </div>
 
@@ -100,7 +100,7 @@ export default function DiagnosticResult() {
                 <section className="bg-card border border-border/50 rounded-[3rem] p-10 space-y-8 shadow-sm">
                     <h2 className="text-xl font-black italic uppercase tracking-tighter flex items-center gap-3">
                         <span className="w-8 h-[2px] bg-primary/20"></span>
-                        KONU HAKİMİYETİ
+                        {t('diagnostic.mastery_map')}
                     </h2>
                     <div className="space-y-6">
                         {Object.entries(topics).map(([topic, data]) => {
@@ -111,7 +111,7 @@ export default function DiagnosticResult() {
                                         <span className="font-bold text-sm uppercase tracking-tight">{topic}</span>
                                         <span className={`font-black text-sm ${tScore > 70 ? 'text-success' : tScore > 40 ? 'text-warning' : 'text-destructive'}`}>%{tScore}</span>
                                     </div>
-                                    <div className="w-full h-4 bg-muted rounded-full overflow-hidden p-1 border border-border/30">
+                                    <div className="w-full h-4 bg-muted/20 rounded-full overflow-hidden p-1 border border-border/30">
                                         <div
                                             className={`h-full rounded-full transition-all duration-1000 ${tScore > 70 ? 'bg-success' : tScore > 40 ? 'bg-warning' : 'bg-destructive'}`}
                                             style={{ width: `${tScore}%` }}
@@ -128,7 +128,7 @@ export default function DiagnosticResult() {
                     <div className="absolute top-0 right-0 p-8 text-4xl opacity-20">🤖</div>
                     <h2 className="text-xl font-black italic uppercase tracking-tighter flex items-center gap-3">
                         <span className="w-8 h-[2px] bg-background/20"></span>
-                        AI REHBERİ
+                        {t('diagnostic.ai_guide')}
                     </h2>
 
                     {isAiLoading ? (
@@ -155,7 +155,7 @@ export default function DiagnosticResult() {
 
             {/* Recommended Order */}
             <section className="bg-primary/[0.03] border border-primary/20 rounded-[3rem] p-10 space-y-8">
-                <h2 className="text-xl font-black italic uppercase tracking-tighter">İDEAL ÇALIŞMA SIRALAMASI</h2>
+                <h2 className="text-xl font-black italic uppercase tracking-tighter">{t('diagnostic.ideal_order')}</h2>
                 <div className="flex flex-wrap gap-4">
                     {Object.entries(topics)
                         .sort((a, b) => a[1].correct / a[1].total - b[1].correct / b[1].total)
