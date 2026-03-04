@@ -5,6 +5,10 @@
             "destination": "/api/index.js"
         },
         {
+            "source": "/api/diagnostic-feedback",
+            "destination": "/api/diagnostic-feedback.js"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }
@@ -46,6 +50,9 @@
     ],
     "functions": {
         "api/index.js": {
+            "maxDuration": 60
+        },
+        "api/diagnostic-feedback.js": {
             "maxDuration": 60
         }
     }

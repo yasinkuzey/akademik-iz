@@ -128,13 +128,11 @@ async function handler(req, res) {
 Kurallar:
 1. DİL: ${langNote}
 2. KAPSAM: ${isGeneral ? 'Sadece bir konuya odaklanma, bu sınıf ve dönem seviyesindeki TÜM önemli konuları kapsayan bir genel tarama testi / sınav provası hazırla.' : 'Belirtilen spesifik konuya odaklan.'}
-3. HIZ: Hızlı yanıt için kısa tut.
-4. UZUNLUK: Sorular maks 20 kelime, şıklar kısa olsun.
-5. ZORLUK: Üst düzey, derin akıl yürütme.
-6. ${question_count} soru, 5 şık (A, B, C, D, E), correctAnswer tek harf (Örn: "A").
+3. ÇEŞİTLİLİK: Her soru dersin FARKLI ve AYRINTILI bir konusuna (topic_tag: örn. Rasyonel Sayılar) ve beceri alanına (skill_tag: örn. Analiz, Uygulama) ait olsun.
+...
 7. SADECE JSON döndür. Başka metin ekleme.
 8. FORMAT:
-[{"question":"...","options":{"A":"...","B":"...","C":"...","D":"...","E":"..."},"correctAnswer":"A","topic_tag":"..."},...]`;
+[{"question":"...","options":{"A":"...","B":"...","C":"...","D":"...","E":"..."},"correctAnswer":"A","topic_tag":"...","skill_tag":"..."}]`;
 
         } else if (action === 'generate_true_false') {
             systemInstruction = 'Sen bir öğretmensin.';
@@ -288,7 +286,7 @@ Kurallar:
         try {
             if (['generate_questions', 'generate_true_false', 'generate_exam_rehearsal', 'evaluate_open_answers'].includes(action)) {
                 if (action === 'generate_questions') {
-                    result = { questions: JSON.parse(clean).slice(0, 5) };
+                    result = { questions: JSON.parse(clean) };
                 } else if (action === 'generate_true_false') {
                     result = { questions: JSON.parse(clean).slice(0, 5) };
                 } else if (action === 'evaluate_open_answers') {

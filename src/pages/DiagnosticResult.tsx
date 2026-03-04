@@ -24,16 +24,54 @@ export default function DiagnosticResult() {
                 .eq('id', id)
                 .single()
 
-            const { data: ans } = await supabase
+            // Fetch answers - try with question join first, fallback to direct
+            const { data: ansWithJoin } = await supabase
                 .from('diagnostic_answers')
                 .select('*, question:diagnostic_questions(*)')
                 .eq('session_id', id)
 
+            // Parse questions_data from session if available (for AI-generated questions)
+            let questionsMap: Record<string, any> = {}
+            if (s?.questions_data) {
+                try {
+                    const parsed = typeof s.questions_data === 'string'
+                        ? JSON.parse(s.questions_data)
+                        : s.questions_data
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach((q: any) => {
+                            questionsMap[q.id] = q
+                        })
+                    }
+                } catch (e) {
+                    console.warn('Failed to parse questions_data:', e)
+                }
+            }
+
+            // Normalize answers - ensure each has topic_tag
+            const normalizedAnswers = (ansWithJoin || []).map((a: any) => {
+                // Priority: answer's own topic_tag > joined question > session questions_data > subject fallback
+                const topicTag = a.topic_tag
+                    || a.question?.topic_tag
+                    || questionsMap[a.question_id]?.topic_tag
+                    || s?.subject
+                    || 'Genel'
+                const skillTag = a.skill_tag
+                    || a.question?.skill_tag
+                    || questionsMap[a.question_id]?.skill_tag
+                    || 'Analiz'
+
+                return {
+                    ...a,
+                    _topic_tag: topicTag,
+                    _skill_tag: skillTag,
+                }
+            })
+
             setSession(s)
-            setAnswers(ans || [])
+            setAnswers(normalizedAnswers)
             setLoading(false)
 
-            if (id && s) generateAiFeedback(s, ans || [])
+            if (id && s) generateAiFeedback(s, normalizedAnswers)
         }
 
         if (id) fetchData()
@@ -44,19 +82,33 @@ export default function DiagnosticResult() {
         setAiStatus(t('diagnostic.loading.data'))
 
         try {
-            // Stage 1: Slight delay for visual progression
             await new Promise(r => setTimeout(r, 800))
             setAiStatus(t('diagnostic.loading.ai'))
 
             const resp = await fetch('/api/diagnostic-feedback', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ session, answers })
+                body: JSON.stringify({
+                    session,
+                    answers: answers.map(a => ({
+                        ...a,
+                        question: a.question || { topic_tag: a._topic_tag, skill_tag: a._skill_tag }
+                    }))
+                })
             })
 
             setAiStatus(t('diagnostic.loading.plan'))
+
+            if (!resp.ok) {
+                const errText = await resp.text()
+                console.error('AI feedback API error:', resp.status, errText)
+                setAiFeedback(t('diagnostic.feedback_error'))
+                setIsAiLoading(false)
+                return
+            }
+
             const data = await resp.json()
-            setAiFeedback(data.feedback)
+            setAiFeedback(data.feedback || t('diagnostic.feedback_error'))
         } catch (err) {
             console.error(err)
             setAiFeedback(t('diagnostic.feedback_error'))
@@ -71,14 +123,16 @@ export default function DiagnosticResult() {
     const correct = answers.filter(a => a.is_correct).length
     const score = total > 0 ? Math.round((correct / total) * 100) : 0
 
-    // Topic breakdown
+    // Topic breakdown using normalized _topic_tag
     const topics: Record<string, { total: number, correct: number }> = {}
     answers.forEach(a => {
-        const topic = a.question.topic_tag
+        const topic = a._topic_tag
         if (!topics[topic]) topics[topic] = { total: 0, correct: 0 }
         topics[topic].total++
         if (a.is_correct) topics[topic].correct++
     })
+
+    const hasTopics = Object.keys(topics).length > 0
 
     return (
         <div className="space-y-12 pb-20 animate-in fade-in slide-in-from-bottom-8 duration-1000">
@@ -87,7 +141,12 @@ export default function DiagnosticResult() {
                 <div className="absolute top-0 right-0 p-8 text-8xl opacity-10 font-black italic">%{score}</div>
                 <div className="space-y-4 relative z-10 w-full md:w-auto text-center md:text-left">
                     <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter leading-none">{t('diagnostic.result_title')}</h1>
-                    <p className="text-muted-foreground font-bold text-lg uppercase">{session?.subject} • {session?.stage.toUpperCase()} {t('diagnostic.level')}</p>
+                    <p className="text-muted-foreground font-bold text-lg uppercase">{session?.subject} • {session?.stage?.toUpperCase()} {t('diagnostic.level')}</p>
+                    <div className="flex items-center gap-4 justify-center md:justify-start">
+                        <span className="text-success font-black">{correct} {t('stats.correct')}</span>
+                        <span className="text-destructive font-black">{total - correct} {t('stats.wrong')}</span>
+                        <span className="text-muted-foreground font-bold">/ {total}</span>
+                    </div>
                 </div>
                 <div className="flex gap-4 w-full md:w-auto relative z-10">
                     <button onClick={() => navigate('/diagnostic')} className="flex-1 px-8 py-4 rounded-2xl bg-secondary text-secondary-foreground font-black text-[10px] uppercase tracking-widest hover:opacity-80 transition-all btn-glow">{t('diagnostic.new_test')}</button>
@@ -102,25 +161,32 @@ export default function DiagnosticResult() {
                         <span className="w-8 h-[2px] bg-primary/20"></span>
                         {t('diagnostic.mastery_map')}
                     </h2>
-                    <div className="space-y-6">
-                        {Object.entries(topics).map(([topic, data]) => {
-                            const tScore = Math.round((data.correct / data.total) * 100)
-                            return (
-                                <div key={topic} className="space-y-2">
-                                    <div className="flex justify-between items-center px-1">
-                                        <span className="font-bold text-sm uppercase tracking-tight">{topic}</span>
-                                        <span className={`font-black text-sm ${tScore > 70 ? 'text-success' : tScore > 40 ? 'text-warning' : 'text-destructive'}`}>%{tScore}</span>
+                    {hasTopics ? (
+                        <div className="space-y-6">
+                            {Object.entries(topics).map(([topic, data]) => {
+                                const tScore = Math.round((data.correct / data.total) * 100)
+                                return (
+                                    <div key={topic} className="space-y-2">
+                                        <div className="flex justify-between items-center px-1">
+                                            <span className="font-bold text-sm uppercase tracking-tight">{topic}</span>
+                                            <span className={`font-black text-sm ${tScore > 70 ? 'text-success' : tScore > 40 ? 'text-warning' : 'text-destructive'}`}>%{tScore}</span>
+                                        </div>
+                                        <div className="w-full h-4 bg-muted/20 rounded-full overflow-hidden p-1 border border-border/30">
+                                            <div
+                                                className={`h-full rounded-full transition-all duration-1000 ${tScore > 70 ? 'bg-success' : tScore > 40 ? 'bg-warning' : 'bg-destructive'}`}
+                                                style={{ width: `${tScore}%` }}
+                                            ></div>
+                                        </div>
                                     </div>
-                                    <div className="w-full h-4 bg-muted/20 rounded-full overflow-hidden p-1 border border-border/30">
-                                        <div
-                                            className={`h-full rounded-full transition-all duration-1000 ${tScore > 70 ? 'bg-success' : tScore > 40 ? 'bg-warning' : 'bg-destructive'}`}
-                                            style={{ width: `${tScore}%` }}
-                                        ></div>
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </div>
+                                )
+                            })}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8">
+                            <div className="text-4xl mb-4 opacity-20">📊</div>
+                            <p className="text-muted-foreground font-bold italic tracking-tight uppercase">{t('diagnostic.no_data') || 'Henüz veri yok'}</p>
+                        </div>
+                    )}
                 </section>
 
                 {/* AI Feedback */}
@@ -146,7 +212,7 @@ export default function DiagnosticResult() {
                     ) : (
                         <div className="prose prose-invert prose-sm">
                             <p className="whitespace-pre-line leading-relaxed font-bold tracking-tight opacity-90 italic">
-                                {aiFeedback}
+                                {aiFeedback || t('diagnostic.feedback_error')}
                             </p>
                         </div>
                     )}
@@ -154,19 +220,21 @@ export default function DiagnosticResult() {
             </div>
 
             {/* Recommended Order */}
-            <section className="bg-primary/[0.03] border border-primary/20 rounded-[3rem] p-10 space-y-8">
-                <h2 className="text-xl font-black italic uppercase tracking-tighter">{t('diagnostic.ideal_order')}</h2>
-                <div className="flex flex-wrap gap-4">
-                    {Object.entries(topics)
-                        .sort((a, b) => a[1].correct / a[1].total - b[1].correct / b[1].total)
-                        .map(([topic], idx) => (
-                            <div key={topic} className="flex items-center gap-4 bg-background border border-border/50 p-4 rounded-2xl shadow-sm">
-                                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black">{idx + 1}</div>
-                                <span className="font-bold uppercase text-[11px] tracking-widest">{topic}</span>
-                            </div>
-                        ))}
-                </div>
-            </section>
+            {hasTopics && (
+                <section className="bg-primary/[0.03] border border-primary/20 rounded-[3rem] p-10 space-y-8">
+                    <h2 className="text-xl font-black italic uppercase tracking-tighter">{t('diagnostic.ideal_order')}</h2>
+                    <div className="flex flex-wrap gap-4">
+                        {Object.entries(topics)
+                            .sort((a, b) => (a[1].correct / a[1].total) - (b[1].correct / b[1].total))
+                            .map(([topic], idx) => (
+                                <div key={topic} className="flex items-center gap-4 bg-background border border-border/50 p-4 rounded-2xl shadow-sm">
+                                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black">{idx + 1}</div>
+                                    <span className="font-bold uppercase text-[11px] tracking-widest">{topic}</span>
+                                </div>
+                            ))}
+                    </div>
+                </section>
+            )}
         </div>
     )
 }

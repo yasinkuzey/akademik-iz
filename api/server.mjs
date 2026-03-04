@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY
 const genAI = GEMINI_KEY ? new GoogleGenerativeAI(GEMINI_KEY) : null
-const MODEL_NAME = process.env.GEMINI_MODEL || 'gemini-1.5-flash'
+const MODEL_NAME = process.env.GEMINI_MODEL || 'gemini-2.0-flash'
 
 const PORT = process.env.PORT || 3001
 
@@ -27,12 +27,14 @@ function send(res, status, data) {
   res.end(JSON.stringify(data))
 }
 
-async function handleGenerateQuestions(model, { subject, topic, hours }) {
-  const prompt = `Ders: ${subject}, Konu: ${topic}, Süre: ${hours} saat. 
-HIZLI ve KISA (maks 15 kelime/soru) 4 adet çoktan seçmeli soru hazırla.
+async function handleGenerateQuestions(model, { subject, topic, hours, count }) {
+  const questionCount = count || 5
+  const prompt = `Ders: ${subject}, Konu: ${topic}, Süre: ${hours ? hours + ' saat' : 'Genel'}. 
+HIZLI ve KISA (maks 20 kelime/soru) ${questionCount} adet çoktan seçmeli soru hazırla.
+Her soru dersin FARKLI ve AYRINTILI bir konusuna (topic_tag: örn. Rasyonel Sayılar) ve beceri alanına (skill_tag: örn. Analiz, Uygulama) ait olsun. 
 Şıklar tek kelime/kısa olsun.
-JSON döndür:
-[{"question":"...","options":{"A":"...","B":"...","C":"...","D":"...","E":"..."},"correctAnswer":"A"}]`
+JSON formatında sadece şu diziyi döndür:
+[{"question":"...","options":{"A":"...","B":"...","C":"...","D":"...","E":"..."},"correctAnswer":"A","topic_tag":"...","skill_tag":"..."}]`
 
   const result = await model.generateContent(prompt)
   const text = result.response?.text?.() || '[]'
@@ -40,11 +42,14 @@ JSON döndür:
   try {
     const jsonStr = text.replace(/```json?\s*|\s*```/g, '').trim()
     const parsed = JSON.parse(jsonStr)
-    questions = Array.isArray(parsed) ? parsed.slice(0, 4) : []
+    // Remove the slice to allow 10/20 questions
+    questions = Array.isArray(parsed) ? parsed : []
     questions = questions.map((q, i) => ({
       question: q.question || '',
       options: q.options || {},
       correctAnswer: q.correctAnswer || 'A',
+      topic_tag: q.topic_tag || topic || subject,
+      skill_tag: q.skill_tag || 'Analiz',
       order: i,
     }))
   } catch (e) {
@@ -52,6 +57,31 @@ JSON döndür:
     questions = []
   }
   return { questions }
+}
+
+async function handleDiagnosticFeedback(model, { session, answers }) {
+  const performanceSummary = answers.map(a =>
+    `- Konu: ${a._topic_tag || a.topic_tag}, Sonuç: ${a.is_correct ? 'Doğru' : 'Yanlış'}`
+  ).join('\n');
+
+  const prompt = `
+    Sen profesyonel bir eğitim koçusun. Şu test sonuçlarını analiz et:
+    Ders: ${session.subject}
+    Seviye: ${session.stage}
+    Performans:
+    ${performanceSummary}
+    
+    Görevin:
+    1. Güçlü ve zayıf yanları belirle.
+    2. Samimi ve motive edici bir dille hitap et.
+    3. 1 haftalık net bir çalışma programı öner.
+    4. 3 pratik ipucu ver.
+    
+    Kural: Doğrudan öğrenciye hitap et. Markdown kullanma. Düz metin. Maksimum 250 kelime. Bilgileri tekrar etme.
+  `;
+
+  const result = await model.generateContent(prompt);
+  return { feedback: result.response.text() };
 }
 
 async function handleEvaluateAnswers(model, { questions, answers }) {
@@ -197,39 +227,58 @@ const handlers = {
 }
 
 const server = http.createServer(async (req, res) => {
-  if (req.method !== 'POST' || req.url !== '/api/gemini') {
+  if (req.method !== 'POST') {
     send(res, 404, { error: 'Not found' })
     return
   }
 
-  if (!genAI) {
-    send(res, 503, { error: 'GEMINI_API_KEY not set' })
+  // Handle /api/diagnostic-feedback
+  if (req.url === '/api/diagnostic-feedback') {
+    if (!genAI) {
+      send(res, 503, { error: 'GEMINI_API_KEY not set' })
+      return
+    }
+    try {
+      const body = await parseBody(req)
+      const model = genAI.getGenerativeModel({ model: MODEL_NAME })
+      const result = await handleDiagnosticFeedback(model, body)
+      send(res, 200, result)
+    } catch (err) {
+      console.error(err)
+      send(res, 500, { error: err.message || 'Server error' })
+    }
     return
   }
 
-  try {
-    const authHeader = req.headers['authorization']
-    if (!authHeader) {
-      console.warn('[WARN] No authorization header found in local server request')
-    }
-
-    const body = await parseBody(req)
-    const action = body.action
-    const handler = handlers[action]
-    if (!handler) {
-      send(res, 400, { error: 'Unknown action' })
+  // Handle /api/gemini
+  if (req.url === '/api/gemini') {
+    if (!genAI) {
+      send(res, 503, { error: 'GEMINI_API_KEY not set' })
       return
     }
-    const model = genAI.getGenerativeModel({
-      model: MODEL_NAME,
-      systemInstruction: action === 'chat' ? 'Sen bir öğrenci öğretmenisin. Soruları Türkçe ve anlaşılır şekilde yanıtla. Konu anlatımı yap, örnek ver. Kısa ve net ol.' : undefined,
-    })
-    const result = await handler(model, body)
-    send(res, 200, result)
-  } catch (err) {
-    console.error(err)
-    send(res, 500, { error: err.message || 'Server error' })
+
+    try {
+      const body = await parseBody(req)
+      const action = body.action
+      const handler = handlers[action]
+      if (!handler) {
+        send(res, 400, { error: 'Unknown action' })
+        return
+      }
+      const model = genAI.getGenerativeModel({
+        model: MODEL_NAME,
+        systemInstruction: action === 'chat' ? 'Sen bir öğrenci öğretmenisin. Soruları Türkçe ve anlaşılır şekilde yanıtla. Konu anlatımı yap, örnek ver. Kısa ve net ol.' : undefined,
+      })
+      const result = await handler(model, body)
+      send(res, 200, result)
+    } catch (err) {
+      console.error(err)
+      send(res, 500, { error: err.message || 'Server error' })
+    }
+    return
   }
+
+  send(res, 404, { error: 'Not found' })
 })
 
 server.listen(PORT, () => {
