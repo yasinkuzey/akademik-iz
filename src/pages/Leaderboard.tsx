@@ -64,15 +64,19 @@ export default function Leaderboard() {
                   else if (i === 1) rankDisplay = <span className="text-2xl drop-shadow-md">🥈</span>
                   else if (i === 2) rankDisplay = <span className="text-2xl drop-shadow-md">🥉</span>
 
+                  const isAnonymous = !r.display_name || r.display_name.includes('@')
+                  const shownName = isAnonymous ? (t('common.anonymous') || 'Anonim') : r.display_name
+                  const avatarLetter = isAnonymous ? '?' : r.display_name![0].toUpperCase()
+
                   return (
                     <tr key={i} className="group hover:bg-primary/[0.02] transition-colors">
                       <td className="p-6 font-black text-center text-lg">{rankDisplay}</td>
                       <td className="p-6 text-base">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-primary to-primary/60 flex items-center justify-center text-sm text-primary-foreground font-black shadow-lg shadow-primary/20 rotate-3 group-hover:rotate-0 transition-transform">
-                            {(r.display_name || 'A')[0].toUpperCase()}
+                            {avatarLetter}
                           </div>
-                          <span className="font-bold text-foreground tracking-tight">{r.display_name || (t('common.anonymous') || 'Anonim')}</span>
+                          <span className="font-bold text-foreground tracking-tight">{shownName}</span>
                         </div>
                       </td>
                       <td className="p-6 text-right font-black text-primary text-lg tabular-nums">

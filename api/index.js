@@ -42,10 +42,7 @@ function safeLog(message, error) {
 // Model fallback chain – user preferred 2.5-flash first, then fallbacks
 // Model fallback chain: 2.0-flash -> 1.5-flash -> 1.5-flash-8b (proactive fallback for quota)
 const MODELS = [
-    process.env.GEMINI_MODEL || 'gemini-2.5-flash',
-    'gemini-2.0-flash',
-    'gemini-1.5-flash',
-    'gemini-1.5-flash-8b'
+    process.env.GEMINI_MODEL || 'gemini-2.5-flash'
 ];
 
 async function handler(req, res) {
@@ -129,7 +126,9 @@ Kurallar:
 1. DİL: ${langNote}
 2. KAPSAM: ${isGeneral ? 'Sadece bir konuya odaklanma, bu sınıf ve dönem seviyesindeki TÜM önemli konuları kapsayan bir genel tarama testi / sınav provası hazırla.' : 'Belirtilen spesifik konuya odaklan.'}
 3. ÇEŞİTLİLİK: Her soru dersin FARKLI ve AYRINTILI bir konusuna (topic_tag: örn. Rasyonel Sayılar) ve beceri alanına (skill_tag: örn. Analiz, Uygulama) ait olsun.
-...
+4. HIZ: Hızlı yanıt için kısa tut.
+5. UZUNLUK: Sorular maks 20 kelime, şıklar kısa olsun.
+6. ZORLUK: Üst düzey, derin akıl yürütme.
 7. SADECE JSON döndür. Başka metin ekleme.
 8. FORMAT:
 [{"question":"...","options":{"A":"...","B":"...","C":"...","D":"...","E":"..."},"correctAnswer":"A","topic_tag":"...","skill_tag":"..."}]`;

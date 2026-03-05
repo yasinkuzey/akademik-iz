@@ -32,23 +32,39 @@ export default function DiagnosticResult() {
 
             // Parse questions_data from session if available (for AI-generated questions)
             let questionsMap: Record<string, any> = {}
+            let embeddedAnswers: any[] | null = null
+
             if (s?.questions_data) {
                 try {
                     const parsed = typeof s.questions_data === 'string'
                         ? JSON.parse(s.questions_data)
                         : s.questions_data
+
                     if (Array.isArray(parsed)) {
+                        // OLD FORMAT
                         parsed.forEach((q: any) => {
                             questionsMap[q.id] = q
                         })
+                    } else if (parsed && typeof parsed === 'object') {
+                        // NEW FORMAT: { questions, answers }
+                        if (Array.isArray(parsed.questions)) {
+                            parsed.questions.forEach((q: any) => {
+                                questionsMap[q.id] = q
+                            })
+                        }
+                        if (Array.isArray(parsed.answers)) {
+                            embeddedAnswers = parsed.answers
+                        }
                     }
                 } catch (e) {
                     console.warn('Failed to parse questions_data:', e)
                 }
             }
 
+            const rawAnswers = embeddedAnswers || ansWithJoin || []
+
             // Normalize answers - ensure each has topic_tag
-            const normalizedAnswers = (ansWithJoin || []).map((a: any) => {
+            const normalizedAnswers = rawAnswers.map((a: any) => {
                 // Priority: answer's own topic_tag > joined question > session questions_data > subject fallback
                 const topicTag = a.topic_tag
                     || a.question?.topic_tag

@@ -158,20 +158,17 @@ export default function DiagnosticSession() {
         }
 
         if (currentIndex < questions.length - 1) {
-            setCurrentIndex(currentIndex + 1)
+            setCurrentIndex(prev => prev + 1)
         } else {
             // Finish session - save all question data as JSON in session for result page
             await supabase
                 .from('diagnostic_sessions')
                 .update({
                     finished_at: new Date().toISOString(),
-                    questions_data: JSON.stringify(questions.map(qq => ({
-                        id: qq.id,
-                        question_text: qq.question_text,
-                        topic_tag: qq.topic_tag,
-                        skill_tag: qq.skill_tag,
-                        correct_index: qq.correct_index,
-                    })))
+                    questions_data: {
+                        questions: questions,
+                        answers: [...answers, answerData]
+                    }
                 })
                 .eq('id', sessionId)
 

@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY
 const genAI = GEMINI_KEY ? new GoogleGenerativeAI(GEMINI_KEY) : null
-const MODEL_NAME = process.env.GEMINI_MODEL || 'gemini-2.0-flash'
+const MODEL_NAME = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
 
 const PORT = process.env.PORT || 3001
 
@@ -268,7 +268,7 @@ const server = http.createServer(async (req, res) => {
       const model = genAI.getGenerativeModel({
         model: MODEL_NAME,
         systemInstruction: action === 'chat' ? 'Sen bir öğrenci öğretmenisin. Soruları Türkçe ve anlaşılır şekilde yanıtla. Konu anlatımı yap, örnek ver. Kısa ve net ol.' : undefined,
-      })
+      }, { apiVersion: 'v1beta' })
       const result = await handler(model, body)
       send(res, 200, result)
     } catch (err) {

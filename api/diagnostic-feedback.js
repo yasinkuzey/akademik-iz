@@ -4,11 +4,11 @@ import { performance } from 'perf_hooks';
 
 const apiKey = process.env.GEMINI_API_KEY;
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+// Use v1beta for gemini-2.0-flash support
+const genAIBeta = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
 const MODELS = [
-    process.env.GEMINI_MODEL || 'gemini-2.0-flash',
-    'gemini-1.5-flash',
-    'gemini-1.5-flash-8b'
+    process.env.GEMINI_MODEL || 'gemini-2.5-flash'
 ];
 
 export default async function handler(req, res) {
@@ -70,7 +70,9 @@ export default async function handler(req, res) {
         let lastError;
 
         for (const modelName of MODELS) {
-            const model = genAI.getGenerativeModel({ model: modelName });
+            // Note: The SDK currently requires specific handling for v1beta if not the default
+            // We'll use the model name directly. Gemini 2.0 requires v1beta.
+            const model = genAI.getGenerativeModel({ model: modelName }, { apiVersion: 'v1beta' });
             try {
                 const result = await model.generateContent(prompt);
                 const feedback = result.response.text();
