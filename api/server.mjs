@@ -29,12 +29,18 @@ function send(res, status, data) {
 
 async function handleGenerateQuestions(model, { subject, topic, hours, count }) {
   const questionCount = count || 5
-  const prompt = `Ders: ${subject}, Konu: ${topic}, Süre: ${hours ? hours + ' saat' : 'Genel'}. 
-HIZLI ve KISA (maks 20 kelime/soru) ${questionCount} adet çoktan seçmeli soru hazırla.
-Her soru dersin FARKLI ve AYRINTILI bir konusuna (topic_tag: örn. Rasyonel Sayılar) ve beceri alanına (skill_tag: örn. Analiz, Uygulama) ait olsun. 
-Şıklar tek kelime/kısa olsun.
-JSON formatında sadece şu diziyi döndür:
-[{"question":"...","options":{"A":"...","B":"...","C":"...","D":"...","E":"..."},"correctAnswer":"A","topic_tag":"...","skill_tag":"..."}]`
+  const prompt = `Sen bir ${subject} öğretmenisin. ${questionCount} adet çoktan seçmeli soru hazırla.
+Ders: ${subject}${topic && topic !== subject ? ', Konu: ' + topic : ''}${hours ? ', Süre: ' + hours + ' saat' : ''}.
+
+ZORUNLU KURALLAR:
+1. Her soru FARKLI bir alt-konuya ait olsun (örn: Matematik -> "Rasyonel Sayılar", "Doğrusal Denklemler", "Üçgenler" gibi).
+2. topic_tag alanı ASLA boş bırakılmasın, mutlaka o sorunun spesifik alt-konu adı olsun.
+3. Sorular kısa olsun (maks 20 kelime).
+4. Şıklar kısa olsun (tek kelime/kısa ifade).
+5. SADECE geçerli JSON dizi döndür, başka hiçbir şey yazma.
+
+JSON formatı (tam olarak bu şekilde):
+[{"question":"...","options":{"A":"...","B":"...","C":"...","D":"...","E":"..."},"correctAnswer":"A","topic_tag":"Spesifik Alt Konu Adı","skill_tag":"Analiz"}]`
 
   const result = await model.generateContent(prompt)
   const text = result.response?.text?.() || '[]'

@@ -33,6 +33,7 @@ export default function DiagnosticResult() {
             // Parse questions_data from session if available (for AI-generated questions)
             let questionsMap: Record<string, any> = {}
             let embeddedAnswers: any[] | null = null
+            let questionsArray: any[] = []
 
             if (s?.questions_data) {
                 try {
@@ -42,12 +43,14 @@ export default function DiagnosticResult() {
 
                     if (Array.isArray(parsed)) {
                         // OLD FORMAT
+                        questionsArray = parsed
                         parsed.forEach((q: any) => {
                             questionsMap[q.id] = q
                         })
                     } else if (parsed && typeof parsed === 'object') {
                         // NEW FORMAT: { questions, answers }
                         if (Array.isArray(parsed.questions)) {
+                            questionsArray = parsed.questions
                             parsed.questions.forEach((q: any) => {
                                 questionsMap[q.id] = q
                             })
@@ -64,16 +67,18 @@ export default function DiagnosticResult() {
             const rawAnswers = embeddedAnswers || ansWithJoin || []
 
             // Normalize answers - ensure each has topic_tag
-            const normalizedAnswers = rawAnswers.map((a: any) => {
-                // Priority: answer's own topic_tag > joined question > session questions_data > subject fallback
-                const topicTag = a.topic_tag
+            // Cross-reference questions array by index if question_id lookup fails
+            const normalizedAnswers = rawAnswers.map((a: any, idx: number) => {
+                const matchedQ = questionsMap[a.question_id] || questionsArray[idx]
+                // Priority: answer's own topic_tag > joined question > questions_data by id > questions_data by index > subject fallback
+                const topicTag = (a.topic_tag && !a.topic_tag.includes('@') ? a.topic_tag : null)
                     || a.question?.topic_tag
-                    || questionsMap[a.question_id]?.topic_tag
+                    || matchedQ?.topic_tag
                     || s?.subject
                     || 'Genel'
                 const skillTag = a.skill_tag
                     || a.question?.skill_tag
-                    || questionsMap[a.question_id]?.skill_tag
+                    || matchedQ?.skill_tag
                     || 'Analiz'
 
                 return {
